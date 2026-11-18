@@ -1,0 +1,2582 @@
+<!DOCTYPE html>
+<html lang="id" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Android Studio Ladybug | 2024.2.1 - Web IDE</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Font Awesome untuk Ikon IDE & Android -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <!-- Google Fonts: Inter & JetBrains Mono -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                        mono: ['JetBrains Mono', 'monospace'],
+                    },
+                    colors: {
+                        darcula: {
+                            bg: '#1E1F22',
+                            panel: '#2B2D30',
+                            stripe: '#26282E',
+                            border: '#393B40',
+                            hover: '#35373B',
+                            active: '#2E436E',
+                            text: '#BCBEC4',
+                            textMuted: '#6F737A',
+                            accent: '#3574F0',
+                            green: '#59A869',
+                            orange: '#CF8E6D',
+                            yellow: '#E5C07B',
+                            purple: '#C77DBB',
+                            cyan: '#56A8F5',
+                            red: '#F75464'
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        ::-webkit-scrollbar { width: 7px; height: 7px; }
+        ::-webkit-scrollbar-track { background: #1E1F22; }
+        ::-webkit-scrollbar-thumb { background: #393B40; border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: #4E5157; }
+
+        .no-scrollbar::-webkit-scrollbar { display: none; }
+        .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+
+        /* Grid latar belakang untuk Layout Designer */
+        .designer-grid {
+            background-color: #1A1B1E;
+            background-image: 
+                linear-gradient(to right, rgba(255,255,255,0.03) 1px, transparent 1px),
+                linear-gradient(to bottom, rgba(255,255,255,0.03) 1px, transparent 1px);
+            background-size: 16px 16px;
+        }
+
+        /* Blueprint Style */
+        .blueprint-surface {
+            background-color: #0D294D !important;
+            background-image: 
+                linear-gradient(to right, rgba(86, 168, 245, 0.14) 1px, transparent 1px),
+                linear-gradient(to bottom, rgba(86, 168, 245, 0.14) 1px, transparent 1px) !important;
+            background-size: 12px 12px !important;
+        }
+        .blueprint-surface .bp-widget {
+            background-color: rgba(86, 168, 245, 0.08) !important;
+            border: 1px dashed #56A8F5 !important;
+            color: #8CC4FF !important;
+            box-shadow: none !important;
+        }
+
+        /* Animasi Toast Android */
+        @keyframes toastFadeInOut {
+            0% { opacity: 0; transform: translate(-50%, 12px); }
+            12% { opacity: 1; transform: translate(-50%, 0); }
+            88% { opacity: 1; transform: translate(-50%, 0); }
+            100% { opacity: 0; transform: translate(-50%, -6px); }
+        }
+        .android-toast {
+            animation: toastFadeInOut 2.6s ease-in-out forwards;
+        }
+
+        /* Code Editor Layered Syntax Highlighting */
+        .code-container {
+            position: relative;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 13px;
+            line-height: 1.6;
+        }
+        .code-textarea, .code-highlight {
+            margin: 0;
+            padding: 12px 16px;
+            border: 0;
+            font-family: inherit;
+            font-size: inherit;
+            line-height: inherit;
+            tab-size: 4;
+            white-space: pre;
+            overflow-wrap: normal;
+            overflow-x: auto;
+        }
+        .code-textarea {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            color: transparent;
+            background: transparent;
+            caret-color: #FFFFFF;
+            resize: none;
+            outline: none;
+            z-index: 2;
+        }
+        .code-highlight {
+            position: relative;
+            z-index: 1;
+            pointer-events: none;
+            color: #BCBEC4;
+            min-height: 100%;
+        }
+
+        /* Stripe Vertical Text */
+        .vertical-text {
+            writing-mode: vertical-rl;
+            transform: rotate(180deg);
+        }
+    </style>
+</head>
+<body class="bg-darcula-bg text-darcula-text font-sans h-screen flex flex-col overflow-hidden select-none">
+
+    <!-- ===================================================================== -->
+    <!-- 1. WELCOME TO ANDROID STUDIO SCREEN (Overlay Modal Awal / Close Proj) -->
+    <!-- ===================================================================== -->
+    <div id="welcome-screen" class="fixed inset-0 bg-[#1B1C1F] z-50 hidden flex-col items-center justify-center p-4 overflow-y-auto">
+        <div class="w-full max-w-4xl bg-darcula-panel border border-darcula-border rounded-2xl shadow-2xl overflow-hidden flex flex-col md:flex-row min-h-[500px]">
+            <!-- Sidebar Kiri Welcome Screen -->
+            <div class="w-full md:w-64 bg-darcula-stripe border-b md:border-b-0 md:border-r border-darcula-border p-5 flex flex-col justify-between">
+                <div>
+                    <div class="flex items-center gap-3 mb-6">
+                        <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-emerald-400 to-teal-700 flex items-center justify-center shadow-lg">
+                            <i class="fab fa-android text-white text-xl"></i>
+                        </div>
+                        <div>
+                            <h1 class="font-bold text-white text-sm">Android Studio</h1>
+                            <p class="text-[11px] text-darcula-textMuted">Ladybug | 2024.2.1</p>
+                        </div>
+                    </div>
+                    <nav class="space-y-1 text-xs">
+                        <button class="w-full text-left px-3 py-2 rounded-lg bg-darcula-active text-white font-medium flex items-center gap-2.5">
+                            <i class="fas fa-folder-tree text-darcula-cyan"></i> Projects
+                        </button>
+                        <button onclick="openCustomizeThemeToast()" class="w-full text-left px-3 py-2 rounded-lg text-darcula-text hover:bg-darcula-hover flex items-center gap-2.5">
+                            <i class="fas fa-palette text-purple-400"></i> Customize
+                        </button>
+                        <button onclick="openSdkManagerModal()" class="w-full text-left px-3 py-2 rounded-lg text-darcula-text hover:bg-darcula-hover flex items-center gap-2.5">
+                            <i class="fas fa-cubes text-emerald-400"></i> SDK Manager
+                        </button>
+                        <button onclick="openAvdManagerModal()" class="w-full text-left px-3 py-2 rounded-lg text-darcula-text hover:bg-darcula-hover flex items-center gap-2.5">
+                            <i class="fas fa-mobile-screen text-amber-400"></i> Virtual Device Manager
+                        </button>
+                    </nav>
+                </div>
+                <div class="pt-4 border-t border-darcula-border text-[11px] text-darcula-textMuted flex items-center justify-between">
+                    <span>JDK 21.0.3</span>
+                    <span>Android SDK 35</span>
+                </div>
+            </div>
+
+            <!-- Konten Kanan Welcome Screen -->
+            <div class="flex-1 p-6 flex flex-col justify-between bg-darcula-bg">
+                <div>
+                    <!-- Action Buttons: New Project, Open, Get from VCS -->
+                    <div class="flex flex-wrap items-center justify-between gap-3 pb-5 border-b border-darcula-border">
+                        <div>
+                            <h2 class="text-lg font-bold text-white">Welcome to Android Studio</h2>
+                            <p class="text-xs text-darcula-textMuted">Buat proyek Android baru atau lanjutkan proyek yang ada</p>
+                        </div>
+                        <div class="flex items-center gap-2">
+                            <button onclick="openNewProjectWizard()" class="px-3.5 py-2 rounded-lg bg-darcula-accent hover:bg-blue-500 text-white text-xs font-semibold flex items-center gap-2 shadow transition">
+                                <i class="fas fa-plus"></i> New Project
+                            </button>
+                            <button onclick="closeWelcomeScreen()" class="px-3 py-2 rounded-lg bg-darcula-panel hover:bg-darcula-hover border border-darcula-border text-xs text-white flex items-center gap-1.5 transition">
+                                <i class="fas fa-folder-open text-amber-400"></i> Open
+                            </button>
+                            <button onclick="openVcsModal()" class="px-3 py-2 rounded-lg bg-darcula-panel hover:bg-darcula-hover border border-darcula-border text-xs text-white flex items-center gap-1.5 transition">
+                                <i class="fab fa-git-alt text-orange-400"></i> Get from VCS
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Daftar Proyek Terbaru -->
+                    <div class="mt-4">
+                        <div class="text-xs font-semibold text-darcula-textMuted uppercase tracking-wider mb-2.5">Recent Projects</div>
+                        <div id="recent-projects-list" class="space-y-2">
+                            <!-- Di-render oleh JS -->
+                        </div>
+                    </div>
+                </div>
+
+                <div class="pt-4 border-t border-darcula-border flex justify-between items-center text-xs text-darcula-textMuted">
+                    <span>Tip: Tekan <kbd class="px-1.5 py-0.5 bg-darcula-panel rounded border border-darcula-border text-[10px]">Shift + Shift</kbd> di IDE untuk Search Everywhere</span>
+                    <button onclick="closeWelcomeScreen()" class="text-darcula-cyan hover:underline">Kembali ke Editor &rarr;</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ===================================================================== -->
+    <!-- 2. NEW PROJECT WIZARD MODAL                                           -->
+    <!-- ===================================================================== -->
+    <div id="new-project-wizard" class="fixed inset-0 bg-black/75 z-50 hidden items-center justify-center p-4">
+        <div class="bg-darcula-panel border border-darcula-border rounded-2xl w-full max-w-3xl shadow-2xl overflow-hidden flex flex-col max-h-[90vh]">
+            <!-- Header Wizard -->
+            <div class="px-5 py-3.5 border-b border-darcula-border flex items-center justify-between bg-darcula-stripe">
+                <div class="flex items-center gap-2.5">
+                    <i class="fab fa-android text-emerald-400 text-lg"></i>
+                    <h3 class="font-bold text-sm text-white">New Project — Phone and Tablet</h3>
+                </div>
+                <button onclick="closeNewProjectWizard()" class="text-darcula-textMuted hover:text-white p-1">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+
+            <!-- Body Wizard -->
+            <div class="p-5 overflow-y-auto space-y-5 flex-1">
+                <!-- Step 1: Pilih Template -->
+                <div>
+                    <label class="block text-xs font-semibold text-white mb-2.5">1. Pilih Template Activity</label>
+                    <div class="grid grid-cols-2 sm:grid-cols-4 gap-3" id="template-cards">
+                        <div onclick="selectProjectTemplate('empty')" data-tpl="empty" class="tpl-card cursor-pointer rounded-xl border-2 border-darcula-accent bg-darcula-bg p-3 flex flex-col items-center text-center transition">
+                            <div class="w-12 h-20 rounded-lg border border-zinc-600 bg-zinc-900 p-1.5 mb-2 flex flex-col justify-between">
+                                <div class="h-2 bg-indigo-500 rounded-sm"></div>
+                                <div class="text-[8px] text-zinc-400">Hello World!</div>
+                                <div class="h-1 bg-zinc-700 rounded"></div>
+                            </div>
+                            <span class="text-xs font-semibold text-white">Empty Views Activity</span>
+                        </div>
+
+                        <div onclick="selectProjectTemplate('bottom_nav')" data-tpl="bottom_nav" class="tpl-card cursor-pointer rounded-xl border border-darcula-border bg-darcula-bg hover:border-zinc-500 p-3 flex flex-col items-center text-center transition">
+                            <div class="w-12 h-20 rounded-lg border border-zinc-600 bg-zinc-900 p-1.5 mb-2 flex flex-col justify-between">
+                                <div class="h-2 bg-emerald-500 rounded-sm"></div>
+                                <div class="text-[8px] text-zinc-400">Home / Dash</div>
+                                <div class="h-2.5 bg-zinc-800 border-t border-zinc-600 flex justify-around items-center text-[6px] text-emerald-400">
+                                    <span>●</span><span>●</span><span>●</span>
+                                </div>
+                            </div>
+                            <span class="text-xs font-semibold text-white">Bottom Navigation</span>
+                        </div>
+
+                        <div onclick="selectProjectTemplate('drawer')" data-tpl="drawer" class="tpl-card cursor-pointer rounded-xl border border-darcula-border bg-darcula-bg hover:border-zinc-500 p-3 flex flex-col items-center text-center transition">
+                            <div class="w-12 h-20 rounded-lg border border-zinc-600 bg-zinc-900 p-1.5 mb-2 flex flex-col justify-between relative overflow-hidden">
+                                <div class="h-2 bg-sky-500 rounded-sm"></div>
+                                <div class="absolute inset-y-0 left-0 w-6 bg-sky-900/90 border-r border-sky-400"></div>
+                                <div class="h-1 bg-zinc-700 rounded"></div>
+                            </div>
+                            <span class="text-xs font-semibold text-white">Navigation Drawer</span>
+                        </div>
+
+                        <div onclick="selectProjectTemplate('login')" data-tpl="login" class="tpl-card cursor-pointer rounded-xl border border-darcula-border bg-darcula-bg hover:border-zinc-500 p-3 flex flex-col items-center text-center transition">
+                            <div class="w-12 h-20 rounded-lg border border-zinc-600 bg-zinc-900 p-1.5 mb-2 flex flex-col justify-center gap-1">
+                                <div class="h-2 bg-zinc-700 rounded"></div>
+                                <div class="h-2 bg-zinc-700 rounded"></div>
+                                <div class="h-2.5 bg-amber-500 rounded"></div>
+                            </div>
+                            <span class="text-xs font-semibold text-white">Login Activity</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Step 2: Konfigurasi Proyek -->
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-2 border-t border-darcula-border text-xs">
+                    <div>
+                        <label class="block text-darcula-textMuted mb-1">Name</label>
+                        <input id="wiz-app-name" type="text" value="MyAwesomeApp" oninput="updateWizardPackage()" class="w-full bg-darcula-bg border border-darcula-border rounded-lg px-3 py-2 text-white focus:outline-none focus:border-darcula-accent">
+                    </div>
+                    <div>
+                        <label class="block text-darcula-textMuted mb-1">Package name</label>
+                        <input id="wiz-package-name" type="text" value="com.example.myawesomeapp" class="w-full bg-darcula-bg border border-darcula-border rounded-lg px-3 py-2 text-white font-mono focus:outline-none focus:border-darcula-accent">
+                    </div>
+                    <div>
+                        <label class="block text-darcula-textMuted mb-1">Language</label>
+                        <select id="wiz-language" class="w-full bg-darcula-bg border border-darcula-border rounded-lg px-3 py-2 text-white focus:outline-none focus:border-darcula-accent">
+                            <option value="Kotlin">Kotlin (Recommended)</option>
+                            <option value="Java">Java</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-darcula-textMuted mb-1">Minimum SDK</label>
+                        <select id="wiz-min-sdk" class="w-full bg-darcula-bg border border-darcula-border rounded-lg px-3 py-2 text-white focus:outline-none focus:border-darcula-accent">
+                            <option value="24">API 24 ("Nougat"; Android 7.0) — 97.4% devices</option>
+                            <option value="26">API 26 ("Oreo"; Android 8.0) — 94.1% devices</option>
+                            <option value="30">API 30 ("R"; Android 11.0) — 78.5% devices</option>
+                            <option value="34">API 34 ("UpsideDownCake"; Android 14.0)</option>
+                            <option value="35">API 35 ("VanillaIceCream"; Android 15.0)</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Footer Wizard -->
+            <div class="px-5 py-3 bg-darcula-stripe border-t border-darcula-border flex items-center justify-between text-xs">
+                <span class="text-darcula-textMuted">Build configuration language: <strong class="text-white">Kotlin DSL (build.gradle.kts)</strong></span>
+                <div class="flex items-center gap-2">
+                    <button onclick="closeNewProjectWizard()" class="px-3.5 py-2 rounded-lg bg-darcula-panel hover:bg-darcula-hover border border-darcula-border text-darcula-text">Cancel</button>
+                    <button onclick="finishCreateProject()" class="px-4 py-2 rounded-lg bg-darcula-accent hover:bg-blue-500 text-white font-semibold shadow">Finish</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ===================================================================== -->
+    <!-- 3. TOP MAIN TOOLBAR (New UI Android Studio)                           -->
+    <!-- ===================================================================== -->
+    <header class="h-11 bg-darcula-panel border-b border-darcula-border flex items-center justify-between px-2 shrink-0 z-30">
+        <!-- Kiri: Hamburger Menu, Logo AS, Menu Bar (File, Edit, View, Build, Run, Tools) & Project Breadcrumb -->
+        <div class="flex items-center gap-1.5 min-w-0">
+            <!-- Toggle Sidebar Mobile -->
+            <button onclick="toggleLeftDrawerMobile()" class="p-1.5 rounded hover:bg-darcula-hover text-darcula-text lg:hidden" title="Toggle Project Tool Window">
+                <i class="fas fa-bars"></i>
+            </button>
+
+            <!-- Logo Android Studio -->
+            <button onclick="openWelcomeScreen()" class="w-7 h-7 rounded-lg bg-gradient-to-br from-emerald-500 to-teal-700 flex items-center justify-center shadow shrink-0 hover:brightness-110 transition" title="Android Studio Home / Welcome Screen">
+                <i class="fab fa-android text-white text-sm"></i>
+            </button>
+
+            <!-- Menu Bar Dropdowns (Desktop) -->
+            <div class="hidden xl:flex items-center text-xs relative" id="ide-menubar">
+                <div class="relative">
+                    <button onclick="toggleMenuDropdown('menu-file')" class="px-2 py-1 rounded hover:bg-darcula-hover text-darcula-text">File</button>
+                    <div id="menu-file" class="ide-dropdown hidden absolute left-0 top-8 w-52 bg-darcula-panel border border-darcula-border rounded-lg shadow-2xl py-1.5 z-50 text-xs">
+                        <button onclick="openNewProjectWizard(); closeAllDropdowns();" class="w-full text-left px-3 py-1.5 hover:bg-darcula-active hover:text-white flex items-center justify-between">
+                            <span>New Project...</span><span class="text-[10px] text-darcula-textMuted">Ctrl+Alt+N</span>
+                        </button>
+                        <button onclick="openNewFileModal(); closeAllDropdowns();" class="w-full text-left px-3 py-1.5 hover:bg-darcula-active hover:text-white flex items-center justify-between">
+                            <span>New Kotlin/XML File...</span><span class="text-[10px] text-darcula-textMuted">Alt+Insert</span>
+                        </button>
+                        <div class="border-t border-darcula-border my-1"></div>
+                        <button onclick="saveAllFiles(); closeAllDropdowns();" class="w-full text-left px-3 py-1.5 hover:bg-darcula-active hover:text-white flex items-center justify-between">
+                            <span>Save All</span><span class="text-[10px] text-darcula-textMuted">Ctrl+S</span>
+                        </button>
+                        <button onclick="exportProjectBundle(); closeAllDropdowns();" class="w-full text-left px-3 py-1.5 hover:bg-darcula-active hover:text-white flex items-center justify-between">
+                            <span>Export Project (.HTML/.JSON)</span><i class="fas fa-download text-darcula-cyan"></i>
+                        </button>
+                        <div class="border-t border-darcula-border my-1"></div>
+                        <button onclick="openWelcomeScreen(); closeAllDropdowns();" class="w-full text-left px-3 py-1.5 hover:bg-darcula-active hover:text-white">
+                            Close Project
+                        </button>
+                    </div>
+                </div>
+
+                <div class="relative">
+                    <button onclick="toggleMenuDropdown('menu-build')" class="px-2 py-1 rounded hover:bg-darcula-hover text-darcula-text">Build</button>
+                    <div id="menu-build" class="ide-dropdown hidden absolute left-0 top-8 w-52 bg-darcula-panel border border-darcula-border rounded-lg shadow-2xl py-1.5 z-50 text-xs">
+                        <button onclick="runGradleTask('assembleDebug'); closeAllDropdowns();" class="w-full text-left px-3 py-1.5 hover:bg-darcula-active hover:text-white flex items-center justify-between">
+                            <span>Make Project</span><span class="text-[10px] text-darcula-textMuted">Ctrl+F9</span>
+                        </button>
+                        <button onclick="runGradleTask('clean'); closeAllDropdowns();" class="w-full text-left px-3 py-1.5 hover:bg-darcula-active hover:text-white">
+                            Clean Project
+                        </button>
+                        <button onclick="runGradleTask('assembleDebug'); closeAllDropdowns();" class="w-full text-left px-3 py-1.5 hover:bg-darcula-active hover:text-white">
+                            Build APK(s)
+                        </button>
+                    </div>
+                </div>
+
+                <div class="relative">
+                    <button onclick="toggleMenuDropdown('menu-run')" class="px-2 py-1 rounded hover:bg-darcula-hover text-darcula-text">Run</button>
+                    <div id="menu-run" class="ide-dropdown hidden absolute left-0 top-8 w-48 bg-darcula-panel border border-darcula-border rounded-lg shadow-2xl py-1.5 z-50 text-xs">
+                        <button onclick="runApplication(false); closeAllDropdowns();" class="w-full text-left px-3 py-1.5 hover:bg-darcula-active hover:text-white flex items-center justify-between">
+                            <span>Run 'app'</span><span class="text-[10px] text-darcula-textMuted">Shift+F10</span>
+                        </button>
+                        <button onclick="runApplication(true); closeAllDropdowns();" class="w-full text-left px-3 py-1.5 hover:bg-darcula-active hover:text-white flex items-center justify-between">
+                            <span>Debug 'app'</span><span class="text-[10px] text-darcula-textMuted">Shift+F9</span>
+                        </button>
+                        <button onclick="stopApplication(); closeAllDropdowns();" class="w-full text-left px-3 py-1.5 hover:bg-darcula-active hover:text-white">
+                            Stop 'app'
+                        </button>
+                    </div>
+                </div>
+
+                <div class="relative">
+                    <button onclick="toggleMenuDropdown('menu-tools')" class="px-2 py-1 rounded hover:bg-darcula-hover text-darcula-text">Tools</button>
+                    <div id="menu-tools" class="ide-dropdown hidden absolute left-0 top-8 w-52 bg-darcula-panel border border-darcula-border rounded-lg shadow-2xl py-1.5 z-50 text-xs">
+                        <button onclick="openAvdManagerModal(); closeAllDropdowns();" class="w-full text-left px-3 py-1.5 hover:bg-darcula-active hover:text-white flex items-center gap-2">
+                            <i class="fas fa-mobile-screen text-amber-400"></i> Device Manager
+                        </button>
+                        <button onclick="openSdkManagerModal(); closeAllDropdowns();" class="w-full text-left px-3 py-1.5 hover:bg-darcula-active hover:text-white flex items-center gap-2">
+                            <i class="fas fa-cubes text-emerald-400"></i> SDK Manager
+                        </button>
+                        <button onclick="toggleRightToolWindow('gemini'); closeAllDropdowns();" class="w-full text-left px-3 py-1.5 hover:bg-darcula-active hover:text-white flex items-center gap-2">
+                            <i class="fas fa-wand-magic-sparkles text-darcula-cyan"></i> Gemini AI Assistant
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Project & Git Branch Widget (New UI Pill) -->
+            <div class="hidden sm:flex items-center gap-1.5 bg-darcula-bg border border-darcula-border rounded-lg px-2.5 py-1 text-xs ml-1">
+                <span class="w-4 h-4 rounded bg-emerald-600/30 text-emerald-400 font-bold text-[10px] flex items-center justify-center">MA</span>
+                <span id="toolbar-project-name" class="font-semibold text-white truncate max-w-[110px]">MyApplication</span>
+                <span class="text-darcula-border">|</span>
+                <i class="fas fa-code-branch text-darcula-textMuted text-[10px]"></i>
+                <span class="text-darcula-textMuted text-[11px]">main</span>
+            </div>
+        </div>
+
+        <!-- Kanan: Run Configurations, Device Selector, Run/Debug/Sync/SDK/Search -->
+        <div class="flex items-center gap-1 sm:gap-1.5">
+            <!-- Module Configuration Pill ('app') -->
+            <div class="hidden md:flex items-center gap-1.5 bg-darcula-bg border border-darcula-border rounded-md px-2 py-1 text-xs">
+                <i class="fab fa-android text-emerald-400 text-xs"></i>
+                <span class="text-white font-medium">app</span>
+            </div>
+
+            <!-- Device Manager Selector -->
+            <div class="flex items-center bg-darcula-bg border border-darcula-border rounded-md px-2 py-1 text-xs">
+                <i class="fas fa-mobile-screen-button text-darcula-cyan mr-1.5 text-[11px]"></i>
+                <select id="device-selector" onchange="changeVirtualDevice()" class="bg-transparent text-white font-medium focus:outline-none cursor-pointer max-w-[105px] sm:max-w-[155px] truncate text-xs">
+                    <option value="Pixel 8 Pro API 35" class="bg-darcula-panel">Pixel 8 Pro API 35</option>
+                    <option value="Pixel 7a API 34" class="bg-darcula-panel">Pixel 7a API 34</option>
+                    <option value="Galaxy S24 Ultra API 34" class="bg-darcula-panel">Galaxy S24 Ultra API 34</option>
+                    <option value="Medium Phone API 35" class="bg-darcula-panel">Medium Phone API 35</option>
+                </select>
+            </div>
+
+            <!-- Tombol Run 'app' (Play Hijau) -->
+            <button id="btn-run-app" onclick="runApplication(false)" class="flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-emerald-600 hover:bg-emerald-500 active:bg-emerald-700 text-white text-xs font-semibold shadow-sm transition" title="Run 'app' (Shift+F10)">
+                <i class="fas fa-play text-[10px]"></i>
+                <span class="hidden sm:inline">Run</span>
+            </button>
+
+            <!-- Tombol Debug 'app' -->
+            <button onclick="runApplication(true)" class="p-1.5 rounded-md bg-darcula-bg hover:bg-darcula-hover border border-darcula-border text-emerald-400 text-xs transition hidden sm:flex" title="Debug 'app' (Shift+F9)">
+                <i class="fas fa-bug"></i>
+            </button>
+
+            <!-- Tombol Stop 'app' -->
+            <button id="btn-stop-app" onclick="stopApplication()" class="hidden p-1.5 rounded-md bg-rose-600/20 hover:bg-rose-600/30 border border-rose-500/40 text-rose-400 text-xs transition" title="Stop 'app'">
+                <i class="fas fa-stop"></i>
+            </button>
+
+            <div class="h-4 w-[1px] bg-darcula-border mx-0.5 hidden sm:block"></div>
+
+            <!-- Sync Project with Gradle Files (Gajah / Refresh) -->
+            <button onclick="syncGradle()" class="p-1.5 rounded-md hover:bg-darcula-hover text-darcula-text text-xs transition" title="Sync Project with Gradle Files">
+                <i id="icon-sync" class="fas fa-arrows-rotate text-emerald-400"></i>
+            </button>
+
+            <!-- Device Manager & SDK Manager Quick Icons -->
+            <button onclick="openAvdManagerModal()" class="p-1.5 rounded-md hover:bg-darcula-hover text-darcula-text text-xs transition hidden md:flex" title="Device Manager (AVD)">
+                <i class="fas fa-mobile-retro text-amber-400"></i>
+            </button>
+            <button onclick="openSdkManagerModal()" class="p-1.5 rounded-md hover:bg-darcula-hover text-darcula-text text-xs transition hidden md:flex" title="SDK Manager">
+                <i class="fas fa-cubes text-darcula-cyan"></i>
+            </button>
+
+            <!-- Search Everywhere (Shift+Shift) -->
+            <button onclick="openSearchEverywhere()" class="p-1.5 rounded-md hover:bg-darcula-hover text-darcula-text text-xs transition" title="Search Everywhere (Shift+Shift)">
+                <i class="fas fa-magnifying-glass"></i>
+            </button>
+        </div>
+    </header>
+
+    <!-- ===================================================================== -->
+    <!-- 4. MAIN IDE BODY (Left Stripe + Left Drawer + Center + Right Drawer + Right Stripe) -->
+    <!-- ===================================================================== -->
+    <div class="flex-1 flex overflow-hidden relative">
+
+        <!-- A. LEFT TOOL WINDOW STRIPE (Vertical Bar Ikon) -->
+        <aside class="w-9 bg-darcula-stripe border-r border-darcula-border flex flex-col items-center justify-between py-2 shrink-0 z-20">
+            <div class="flex flex-col items-center gap-2">
+                <button onclick="switchLeftToolWindow('project')" id="stripe-left-project" class="w-7 h-7 rounded-md bg-darcula-active text-white flex items-center justify-center text-xs transition" title="Project (Alt+1)">
+                    <i class="fas fa-folder"></i>
+                </button>
+                <button onclick="switchLeftToolWindow('resources')" id="stripe-left-resources" class="w-7 h-7 rounded-md text-darcula-textMuted hover:bg-darcula-hover hover:text-white flex items-center justify-center text-xs transition" title="Resource Manager">
+                    <i class="fas fa-swatchbook"></i>
+                </button>
+                <button onclick="switchLeftToolWindow('structure')" id="stripe-left-structure" class="w-7 h-7 rounded-md text-darcula-textMuted hover:bg-darcula-hover hover:text-white flex items-center justify-center text-xs transition" title="Structure (Alt+7)">
+                    <i class="fas fa-sitemap"></i>
+                </button>
+            </div>
+            <div class="flex flex-col items-center gap-2">
+                <button onclick="toggleBottomToolWindow('build')" class="w-7 h-7 rounded-md text-darcula-textMuted hover:bg-darcula-hover hover:text-white flex items-center justify-center text-xs" title="Build Output">
+                    <i class="fas fa-hammer"></i>
+                </button>
+                <button onclick="toggleBottomToolWindow('logcat')" class="w-7 h-7 rounded-md text-darcula-textMuted hover:bg-darcula-hover hover:text-white flex items-center justify-center text-xs" title="Logcat">
+                    <i class="fas fa-cat"></i>
+                </button>
+                <button onclick="toggleBottomToolWindow('terminal')" class="w-7 h-7 rounded-md text-darcula-textMuted hover:bg-darcula-hover hover:text-white flex items-center justify-center text-xs" title="Terminal">
+                    <i class="fas fa-terminal"></i>
+                </button>
+            </div>
+        </aside>
+
+        <!-- Backdrop Mobile untuk Left Drawer -->
+        <div id="left-drawer-backdrop" onclick="toggleLeftDrawerMobile()" class="fixed inset-0 bg-black/60 z-20 hidden lg:hidden"></div>
+
+        <!-- B. LEFT TOOL WINDOW DRAWER (Project / Resource Manager / Structure) -->
+        <aside id="left-tool-drawer" class="w-64 sm:w-72 bg-darcula-panel border-r border-darcula-border flex flex-col shrink-0 fixed lg:static inset-y-0 left-9 lg:left-0 top-11 lg:top-0 z-20 transform -translate-x-[120%] lg:translate-x-0 transition-transform duration-200">
+            
+            <!-- 1. VIEW: PROJECT EXPLORER -->
+            <div id="left-view-project" class="flex-1 flex flex-col overflow-hidden">
+                <div class="h-8 px-3 border-b border-darcula-border flex items-center justify-between text-xs font-semibold text-white shrink-0">
+                    <div class="flex items-center gap-1.5">
+                        <i class="fab fa-android text-emerald-400"></i>
+                        <span>Android</span>
+                    </div>
+                    <div class="flex items-center gap-1">
+                        <button onclick="openNewFileModal()" class="p-1 hover:bg-darcula-hover rounded text-darcula-textMuted hover:text-white" title="New File">
+                            <i class="fas fa-plus"></i>
+                        </button>
+                        <button onclick="exportProjectBundle()" class="p-1 hover:bg-darcula-hover rounded text-darcula-textMuted hover:text-white" title="Export Project">
+                            <i class="fas fa-download"></i>
+                        </button>
+                        <button onclick="toggleLeftDrawerMobile()" class="p-1 hover:bg-darcula-hover rounded text-darcula-textMuted hover:text-white lg:hidden">
+                            <i class="fas fa-times"></i>
+                        </button>
+                    </div>
+                </div>
+                <div id="file-tree-container" class="flex-1 overflow-y-auto p-2 text-xs space-y-0.5">
+                    <!-- Tree dirender oleh JS -->
+                </div>
+            </div>
+
+            <!-- 2. VIEW: RESOURCE MANAGER -->
+            <div id="left-view-resources" class="hidden flex-1 flex-col overflow-hidden">
+                <div class="h-8 px-3 border-b border-darcula-border flex items-center justify-between text-xs font-semibold text-white shrink-0">
+                    <span>Resource Manager</span>
+                    <button onclick="toggleLeftDrawerMobile()" class="p-1 lg:hidden"><i class="fas fa-times"></i></button>
+                </div>
+                <div class="flex-1 overflow-y-auto p-3 space-y-4 text-xs">
+                    <div>
+                        <div class="font-semibold text-darcula-textMuted uppercase text-[10px] mb-2">Colors (colors.xml)</div>
+                        <div class="grid grid-cols-2 gap-2" id="resource-colors-grid">
+                            <!-- Diisi oleh JS -->
+                        </div>
+                    </div>
+                    <div>
+                        <div class="font-semibold text-darcula-textMuted uppercase text-[10px] mb-2">Vector Drawables</div>
+                        <div class="grid grid-cols-3 gap-2">
+                            <button onclick="insertDrawableToLayout('fa-android', '#10B981')" class="p-2.5 rounded-lg bg-darcula-bg hover:bg-darcula-hover border border-darcula-border flex flex-col items-center gap-1">
+                                <i class="fab fa-android text-emerald-400 text-lg"></i>
+                                <span class="text-[10px] truncate w-full text-center">ic_android</span>
+                            </button>
+                            <button onclick="insertDrawableToLayout('fa-heart', '#F43F5E')" class="p-2.5 rounded-lg bg-darcula-bg hover:bg-darcula-hover border border-darcula-border flex flex-col items-center gap-1">
+                                <i class="fas fa-heart text-rose-500 text-lg"></i>
+                                <span class="text-[10px] truncate w-full text-center">ic_favorite</span>
+                            </button>
+                            <button onclick="insertDrawableToLayout('fa-star', '#F59E0B')" class="p-2.5 rounded-lg bg-darcula-bg hover:bg-darcula-hover border border-darcula-border flex flex-col items-center gap-1">
+                                <i class="fas fa-star text-amber-400 text-lg"></i>
+                                <span class="text-[10px] truncate w-full text-center">ic_star</span>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 3. VIEW: STRUCTURE OUTLINE -->
+            <div id="left-view-structure" class="hidden flex-1 flex-col overflow-hidden">
+                <div class="h-8 px-3 border-b border-darcula-border flex items-center justify-between text-xs font-semibold text-white shrink-0">
+                    <span>Structure</span>
+                    <button onclick="toggleLeftDrawerMobile()" class="p-1 lg:hidden"><i class="fas fa-times"></i></button>
+                </div>
+                <div id="structure-tree-list" class="flex-1 overflow-y-auto p-3 text-xs space-y-1.5 font-mono">
+                    <!-- Diisi dinamis berdasarkan file aktif -->
+                </div>
+            </div>
+        </aside>
+
+        <!-- C. CENTER WORKSPACE (Tabs + Code Editor + XML Visual Designer + Bottom Tool Windows) -->
+        <main class="flex-1 flex flex-col min-w-0 bg-darcula-bg overflow-hidden">
+            
+            <!-- Top Editor Tabs & XML Mode Switcher -->
+            <div class="h-8 bg-darcula-panel border-b border-darcula-border flex items-center justify-between px-1 shrink-0">
+                <div id="editor-tabs" class="flex items-center overflow-x-auto no-scrollbar h-full">
+                    <!-- Tab file dirender JS -->
+                </div>
+
+                <!-- Mode Switcher (Code | Split | Design) -->
+                <div id="view-mode-switcher" class="flex items-center bg-darcula-bg p-0.5 rounded border border-darcula-border mr-1 shrink-0">
+                    <button onclick="setEditorMode('code')" id="mode-btn-code" class="px-2 py-0.5 rounded text-[11px] font-medium transition">Code</button>
+                    <button onclick="setEditorMode('split')" id="mode-btn-split" class="px-2 py-0.5 rounded text-[11px] font-medium transition hidden sm:inline-block">Split</button>
+                    <button onclick="setEditorMode('design')" id="mode-btn-design" class="px-2 py-0.5 rounded text-[11px] font-medium transition">Design</button>
+                </div>
+            </div>
+
+            <!-- Breadcrumb Bar di bawah Tab -->
+            <div class="h-6 bg-darcula-bg border-b border-darcula-border/60 px-3 flex items-center justify-between text-[11px] text-darcula-textMuted shrink-0">
+                <div class="flex items-center gap-1.5 truncate">
+                    <span id="breadcrumb-path">app &gt; java &gt; com.example.myapp &gt; MainActivity.kt</span>
+                </div>
+                <!-- Quick Snippet Bar (Sangat membantu pengguna HP/Mobile!) -->
+                <div class="flex items-center gap-1 overflow-x-auto no-scrollbar">
+                    <span class="text-[10px] hidden md:inline mr-1">Quick Insert:</span>
+                    <button onclick="insertCodeSnippet('toast')" class="px-1.5 py-0.2 bg-darcula-panel hover:bg-darcula-hover border border-darcula-border rounded text-[10px] text-darcula-cyan">Toast</button>
+                    <button onclick="insertCodeSnippet('logd')" class="px-1.5 py-0.2 bg-darcula-panel hover:bg-darcula-hover border border-darcula-border rounded text-[10px] text-emerald-400">Log.d</button>
+                    <button onclick="insertCodeSnippet('click')" class="px-1.5 py-0.2 bg-darcula-panel hover:bg-darcula-hover border border-darcula-border rounded text-[10px] text-amber-400">OnClick</button>
+                </div>
+            </div>
+
+            <!-- Editor & Visual Designer Area -->
+            <div class="flex-1 flex overflow-hidden relative">
+                
+                <!-- 1. CODE EDITOR PANE -->
+                <div id="pane-code-editor" class="flex-1 flex flex-col min-w-0 bg-darcula-bg overflow-hidden border-r border-darcula-border">
+                    <div class="flex-1 flex overflow-auto relative">
+                        <div id="line-numbers" class="w-10 py-3 pr-2 text-right font-mono text-[13px] leading-[1.6] text-darcula-textMuted bg-darcula-bg border-r border-darcula-border/50 select-none shrink-0">
+                            1
+                        </div>
+                        <div class="flex-1 code-container min-w-0">
+                            <pre id="code-highlight-layer" class="code-highlight" aria-hidden="true"></pre>
+                            <textarea id="code-editor-textarea" class="code-textarea" spellcheck="false" autocomplete="off" autocorrect="off" autocapitalize="off"></textarea>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 2. VISUAL LAYOUT DESIGNER PANE (Android Studio XML Designer) -->
+                <div id="pane-layout-designer" class="hidden flex-1 flex-col min-w-0 designer-grid overflow-hidden">
+                    <!-- Designer Action Toolbar -->
+                    <div class="h-8 bg-darcula-panel border-b border-darcula-border px-2.5 flex items-center justify-between text-xs shrink-0">
+                        <div class="flex items-center gap-1.5">
+                            <!-- Design / Blueprint / Both Toggle -->
+                            <button onclick="setSurfaceMode('design')" id="surf-btn-design" class="px-2 py-0.5 rounded bg-darcula-active text-white text-[11px]" title="Design Surface">Design</button>
+                            <button onclick="setSurfaceMode('blueprint')" id="surf-btn-blueprint" class="px-2 py-0.5 rounded bg-darcula-bg text-darcula-textMuted hover:text-white text-[11px]" title="Blueprint Surface">Blueprint</button>
+                            
+                            <span class="text-darcula-border">|</span>
+                            <!-- Toggle Dark/Light App Preview -->
+                            <button onclick="togglePreviewTheme()" class="p-1 rounded hover:bg-darcula-hover text-darcula-text" title="Toggle App Night/Day Theme">
+                                <i id="icon-preview-theme" class="fas fa-sun text-amber-400"></i>
+                            </button>
+                        </div>
+
+                        <!-- Zoom & Orientation Controls -->
+                        <div class="flex items-center gap-1.5 text-[11px]">
+                            <button onclick="changeDesignerZoom(-0.1)" class="px-1.5 py-0.5 rounded bg-darcula-bg hover:bg-darcula-hover border border-darcula-border">-</button>
+                            <span id="designer-zoom-label" class="w-10 text-center font-mono">100%</span>
+                            <button onclick="changeDesignerZoom(0.1)" class="px-1.5 py-0.5 rounded bg-darcula-bg hover:bg-darcula-hover border border-darcula-border">+</button>
+                        </div>
+                    </div>
+
+                    <!-- Designer Main 3-Column Layout: Palette+Tree | Design Surface | Attributes -->
+                    <div class="flex-1 flex flex-col xl:flex-row overflow-y-auto xl:overflow-hidden">
+                        
+                        <!-- Kiri: Palette & Component Tree -->
+                        <div class="w-full xl:w-48 bg-darcula-panel border-b xl:border-b-0 xl:border-r border-darcula-border flex flex-col shrink-0">
+                            <!-- Palette -->
+                            <div class="p-2 border-b border-darcula-border">
+                                <div class="text-[10px] font-bold uppercase text-darcula-textMuted mb-1.5">Palette (Tap to Add)</div>
+                                <div class="grid grid-cols-3 xl:grid-cols-2 gap-1 text-[11px]">
+                                    <button onclick="addWidgetToLayout('TextView')" class="px-2 py-1 rounded bg-darcula-bg hover:bg-darcula-active border border-darcula-border text-left truncate flex items-center gap-1">
+                                        <i class="fas fa-font text-darcula-cyan text-[10px]"></i> TextView
+                                    </button>
+                                    <button onclick="addWidgetToLayout('Button')" class="px-2 py-1 rounded bg-darcula-bg hover:bg-darcula-active border border-darcula-border text-left truncate flex items-center gap-1">
+                                        <i class="fas fa-square text-emerald-400 text-[10px]"></i> Button
+                                    </button>
+                                    <button onclick="addWidgetToLayout('EditText')" class="px-2 py-1 rounded bg-darcula-bg hover:bg-darcula-active border border-darcula-border text-left truncate flex items-center gap-1">
+                                        <i class="fas fa-i-cursor text-purple-400 text-[10px]"></i> EditText
+                                    </button>
+                                    <button onclick="addWidgetToLayout('ImageView')" class="px-2 py-1 rounded bg-darcula-bg hover:bg-darcula-active border border-darcula-border text-left truncate flex items-center gap-1">
+                                        <i class="fas fa-image text-amber-400 text-[10px]"></i> ImageView
+                                    </button>
+                                    <button onclick="addWidgetToLayout('Switch')" class="px-2 py-1 rounded bg-darcula-bg hover:bg-darcula-active border border-darcula-border text-left truncate flex items-center gap-1">
+                                        <i class="fas fa-toggle-on text-sky-400 text-[10px]"></i> Switch
+                                    </button>
+                                    <button onclick="addWidgetToLayout('CheckBox')" class="px-2 py-1 rounded bg-darcula-bg hover:bg-darcula-active border border-darcula-border text-left truncate flex items-center gap-1">
+                                        <i class="fas fa-check-square text-rose-400 text-[10px]"></i> CheckBox
+                                    </button>
+                                </div>
+                            </div>
+
+                            <!-- Component Tree -->
+                            <div class="p-2 flex-1 overflow-y-auto max-h-32 xl:max-h-none">
+                                <div class="text-[10px] font-bold uppercase text-darcula-textMuted mb-1">Component Tree</div>
+                                <div class="text-[11px] font-mono text-darcula-cyan mb-1">
+                                    <i class="fas fa-sitemap mr-1"></i>ConstraintLayout
+                                </div>
+                                <div id="component-tree-list" class="pl-3 space-y-0.5 text-[11px] font-mono">
+                                    <!-- Diisi oleh JS -->
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Tengah: Phone Canvas Preview -->
+                        <div class="flex-1 flex items-center justify-center p-4 overflow-auto min-h-[380px]">
+                            <div id="designer-zoom-wrapper" class="transition-transform duration-150 origin-center">
+                                <div id="designer-phone-frame" class="w-[240px] h-[440px] bg-zinc-900 rounded-[28px] p-2 border-2 border-zinc-700 shadow-2xl flex flex-col">
+                                    <div class="w-16 h-3 bg-black rounded-full mx-auto mb-1"></div>
+                                    <div id="designer-screen-bg" class="flex-1 bg-white text-zinc-900 rounded-[20px] overflow-hidden flex flex-col">
+                                        <div class="h-4 bg-indigo-700 text-white text-[9px] px-2.5 flex items-center justify-between">
+                                            <span>19:26</span>
+                                            <span><i class="fas fa-wifi"></i> 100%</span>
+                                        </div>
+                                        <div class="h-9 bg-indigo-600 text-white px-3 flex items-center text-xs font-semibold shadow-sm">
+                                            <span id="designer-appbar-title">MyApplication</span>
+                                        </div>
+                                        <div id="designer-canvas-area" class="flex-1 p-3 flex flex-col gap-2.5 items-center justify-center overflow-y-auto">
+                                            <!-- Widgets dirender JS -->
+                                        </div>
+                                        <div class="h-4 bg-zinc-100 border-t border-zinc-200 flex items-center justify-center gap-6 text-[9px] text-zinc-400">
+                                            <i class="fas fa-caret-left"></i><i class="far fa-circle"></i><i class="far fa-square"></i>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Kanan: Attributes Inspector -->
+                        <div class="w-full xl:w-56 bg-darcula-panel border-t xl:border-t-0 xl:border-l border-darcula-border p-2.5 text-xs overflow-y-auto shrink-0">
+                            <div class="flex items-center justify-between border-b border-darcula-border pb-1.5 mb-2">
+                                <span class="font-semibold text-white">Attributes</span>
+                                <span id="selected-widget-type" class="text-[10px] px-1.5 py-0.5 rounded bg-darcula-bg text-darcula-orange font-mono">None</span>
+                            </div>
+                            <div id="attribute-fields" class="space-y-2 text-darcula-textMuted">
+                                <p class="text-[11px] italic">Pilih elemen pada layar desain atau Component Tree untuk mengedit atributnya.</p>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+
+            </div>
+
+            <!-- ================================================================= -->
+            <!-- 5. BOTTOM TOOL WINDOWS (Build / Logcat / Terminal / Problems)     -->
+            <!-- ================================================================= -->
+            <section id="bottom-tool-window" class="h-44 sm:h-48 bg-darcula-panel border-t border-darcula-border flex flex-col shrink-0 z-10 transition-all duration-200">
+                <div class="h-8 px-2 border-b border-darcula-border flex items-center justify-between text-xs shrink-0">
+                    <div class="flex items-center gap-1 overflow-x-auto no-scrollbar">
+                        <button onclick="switchBottomTab('build')" id="tab-bottom-build" class="px-2.5 py-1 rounded-t font-medium border-b-2 border-darcula-accent text-white bg-darcula-bg/60 flex items-center gap-1.5 shrink-0">
+                            <i class="fas fa-hammer text-amber-400 text-[11px]"></i><span>Build</span>
+                        </button>
+                        <button onclick="switchBottomTab('logcat')" id="tab-bottom-logcat" class="px-2.5 py-1 rounded-t font-medium border-b-2 border-transparent text-darcula-textMuted hover:text-darcula-text flex items-center gap-1.5 shrink-0">
+                            <i class="fas fa-cat text-emerald-400 text-[11px]"></i><span>Logcat</span>
+                            <span id="logcat-live-dot" class="hidden w-2 h-2 rounded-full bg-emerald-400"></span>
+                        </button>
+                        <button onclick="switchBottomTab('problems')" id="tab-bottom-problems" class="px-2.5 py-1 rounded-t font-medium border-b-2 border-transparent text-darcula-textMuted hover:text-darcula-text flex items-center gap-1.5 shrink-0">
+                            <i class="fas fa-circle-exclamation text-rose-400 text-[11px]"></i><span>Problems</span>
+                            <span id="problems-count-badge" class="px-1.5 py-0.2 rounded-full bg-darcula-bg text-[10px]">0</span>
+                        </button>
+                        <button onclick="switchBottomTab('terminal')" id="tab-bottom-terminal" class="px-2.5 py-1 rounded-t font-medium border-b-2 border-transparent text-darcula-textMuted hover:text-darcula-text flex items-center gap-1.5 shrink-0">
+                            <i class="fas fa-terminal text-darcula-cyan text-[11px]"></i><span>Terminal</span>
+                        </button>
+                    </div>
+
+                    <div class="flex items-center gap-1.5 text-darcula-textMuted shrink-0">
+                        <button onclick="clearBottomLogs()" class="p-1 hover:text-white rounded" title="Clear Console">
+                            <i class="fas fa-trash-can text-[11px]"></i>
+                        </button>
+                        <button onclick="toggleBottomPanelHeight()" class="p-1 hover:text-white rounded" title="Minimize / Expand">
+                            <i id="icon-bottom-expand" class="fas fa-chevron-down text-[11px]"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Konten Tab Bottom -->
+                <div class="flex-1 bg-darcula-bg overflow-hidden flex flex-col font-mono text-xs">
+                    
+                    <!-- Tab 1: Build Output -->
+                    <div id="content-bottom-build" class="flex-1 p-2.5 overflow-y-auto space-y-1 text-[11px] sm:text-xs">
+                        <div class="text-darcula-textMuted">Gradle Daemon initialized. Ready to build project.</div>
+                    </div>
+
+                    <!-- Tab 2: Logcat -->
+                    <div id="content-bottom-logcat" class="hidden flex-1 flex-col overflow-hidden">
+                        <div class="h-7 px-2.5 bg-darcula-panel/50 border-b border-darcula-border flex items-center gap-2 text-[11px]">
+                            <select id="logcat-level-filter" onchange="renderLogcat()" class="bg-darcula-bg border border-darcula-border rounded px-1.5 py-0.5 text-darcula-text focus:outline-none">
+                                <option value="ALL">Level: Verbose (All)</option>
+                                <option value="D">Debug &amp; Above</option>
+                                <option value="I">Info &amp; Above</option>
+                                <option value="W">Warn &amp; Error</option>
+                                <option value="E">Error Only</option>
+                            </select>
+                            <input id="logcat-filter" onkeyup="renderLogcat()" type="text" placeholder="Filter tag atau pesan log..." class="bg-darcula-bg border border-darcula-border rounded px-2 py-0.5 text-darcula-text focus:outline-none focus:border-darcula-accent flex-1 max-w-sm">
+                        </div>
+                        <div id="logcat-list" class="flex-1 p-2 overflow-y-auto space-y-1 text-[11px]">
+                            <div class="text-darcula-textMuted italic">Jalankan aplikasi (Run) untuk melihat output Logcat dari perangkat...</div>
+                        </div>
+                    </div>
+
+                    <!-- Tab 3: Problems (Code Analysis) -->
+                    <div id="content-bottom-problems" class="hidden flex-1 p-2.5 overflow-y-auto space-y-1.5 text-[11px]">
+                        <div class="text-emerald-400"><i class="fas fa-check-circle mr-1.5"></i>No syntax errors or lint warnings detected in current file.</div>
+                    </div>
+
+                    <!-- Tab 4: Terminal -->
+                    <div id="content-bottom-terminal" class="hidden flex-1 p-2.5 overflow-y-auto flex-col justify-between text-[11px] sm:text-xs">
+                        <div id="terminal-history" class="space-y-1 text-darcula-text">
+                            <div class="text-emerald-400">Android Studio Embedded Terminal — Gradle 8.7</div>
+                            <div class="text-darcula-textMuted">Perintah: <span class="text-white">./gradlew assembleDebug</span>, <span class="text-white">./gradlew clean</span>, <span class="text-white">adb devices</span>, <span class="text-white">ls</span>, <span class="text-white">clear</span></div>
+                        </div>
+                        <div class="flex items-center gap-2 mt-2 pt-1.5 border-t border-darcula-border/50">
+                            <span class="text-emerald-400 font-semibold">dev@android-studio:~$</span>
+                            <input id="terminal-input" onkeydown="handleTerminalCommand(event)" type="text" placeholder="Ketik perintah..." class="bg-transparent text-white focus:outline-none flex-1">
+                        </div>
+                    </div>
+
+                </div>
+            </section>
+        </main>
+
+        <!-- D. RIGHT TOOL WINDOW DRAWER (Running Devices Emulator / Gradle / Gemini AI) -->
+        <aside id="right-tool-drawer" class="hidden w-full sm:w-[330px] md:w-[350px] bg-darcula-panel border-l border-darcula-border flex-col shrink-0 z-20 fixed sm:static inset-0 top-11 sm:top-0">
+            
+            <!-- 1. RUNNING DEVICES (EMULATOR ANDROID LENGKAP) -->
+            <div id="right-view-emulator" class="flex-1 flex flex-col overflow-hidden">
+                <div class="h-8 px-3 border-b border-darcula-border flex items-center justify-between text-xs bg-darcula-panel shrink-0">
+                    <div class="flex items-center gap-2">
+                        <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+                        <span id="emulator-device-title" class="font-semibold text-white truncate">Pixel 8 Pro API 35</span>
+                    </div>
+                    <div class="flex items-center gap-1">
+                        <button onclick="takeEmulatorScreenshot()" class="p-1.5 hover:bg-darcula-hover rounded text-darcula-textMuted hover:text-white" title="Take Screenshot">
+                            <i class="fas fa-camera"></i>
+                        </button>
+                        <button onclick="rotateEmulator()" class="p-1.5 hover:bg-darcula-hover rounded text-darcula-textMuted hover:text-white" title="Rotate Device">
+                            <i class="fas fa-rotate"></i>
+                        </button>
+                        <button onclick="closeRightDrawer()" class="p-1.5 hover:bg-darcula-hover rounded text-darcula-textMuted hover:text-white" title="Hide Emulator">
+                            <i class="fas fa-minus"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Area Body Emulator + Tombol Fisik Samping -->
+                <div class="flex-1 bg-[#141517] flex items-center justify-center p-3 overflow-y-auto relative">
+                    <div class="flex items-center gap-1.5">
+                        <!-- Bingkai HP Android -->
+                        <div id="emulator-phone-body" class="w-[255px] h-[495px] bg-black rounded-[34px] p-2.5 border-[3px] border-zinc-700 shadow-2xl flex flex-col transition-all duration-300 relative">
+                            <!-- Kamera Punch Hole -->
+                            <div class="w-3 h-3 rounded-full bg-zinc-900 border border-zinc-700 mx-auto mb-1.5 shrink-0"></div>
+
+                            <!-- Layar Android Live -->
+                            <div id="emulator-screen-container" class="flex-1 bg-slate-50 text-zinc-900 rounded-[24px] overflow-hidden flex flex-col relative transition-opacity duration-200">
+                                <!-- Status Bar -->
+                                <div class="h-5 bg-indigo-700 text-white text-[10px] px-3 flex items-center justify-between font-medium shrink-0">
+                                    <span>19:26</span>
+                                    <div class="flex items-center gap-1.5">
+                                        <span class="text-[9px]">5G</span>
+                                        <i class="fas fa-wifi text-[9px]"></i>
+                                        <i class="fas fa-battery-full text-[10px]"></i>
+                                    </div>
+                                </div>
+
+                                <!-- ActionBar Aplikasi -->
+                                <div class="h-10 bg-indigo-600 text-white px-3.5 flex items-center justify-between shadow shrink-0">
+                                    <span id="emulator-appbar-title" class="font-semibold text-xs tracking-wide">MyApplication</span>
+                                    <span id="emulator-debug-badge" class="hidden px-1.5 py-0.2 bg-amber-400 text-black text-[9px] font-bold rounded">DEBUG</span>
+                                </div>
+
+                                <!-- Konten Layar Aplikasi Interaktif -->
+                                <div id="emulator-live-screen" class="flex-1 p-4 flex flex-col gap-3 items-center justify-center overflow-y-auto relative">
+                                    <!-- Dirender saat Run ditekan -->
+                                </div>
+
+                                <!-- Volume HUD Overlay -->
+                                <div id="emulator-volume-hud" class="hidden absolute right-2 top-16 bg-zinc-900/90 text-white px-2 py-3 rounded-full flex flex-col items-center gap-1.5 shadow-lg z-30">
+                                    <i class="fas fa-volume-high text-[10px] text-emerald-400"></i>
+                                    <div class="w-1.5 h-16 bg-zinc-700 rounded-full overflow-hidden flex flex-col justify-end">
+                                        <div id="emulator-volume-bar" class="w-full bg-emerald-400 h-3/4 transition-all"></div>
+                                    </div>
+                                </div>
+
+                                <!-- Toast Container -->
+                                <div id="emulator-toast-container" class="pointer-events-none absolute bottom-10 left-0 right-0 z-30"></div>
+
+                                <!-- Android 3-Button Navigation Bar -->
+                                <div class="h-7 bg-zinc-100 border-t border-zinc-200 flex items-center justify-around text-zinc-500 text-xs shrink-0">
+                                    <button onclick="emulatorNavAction('back')" class="px-4 py-1 hover:text-zinc-900 active:scale-90" title="Back"><i class="fas fa-caret-left"></i></button>
+                                    <button onclick="emulatorNavAction('home')" class="px-4 py-1 hover:text-zinc-900 active:scale-90" title="Home"><i class="far fa-circle text-[10px]"></i></button>
+                                    <button onclick="emulatorNavAction('recents')" class="px-4 py-1 hover:text-zinc-900 active:scale-90" title="Overview"><i class="far fa-square text-[10px]"></i></button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Tombol Fisik Samping HP (Power, Vol+, Vol-) -->
+                        <div class="flex flex-col gap-2">
+                            <button onclick="emulatorPhysicalButton('power')" class="w-2 h-8 bg-zinc-700 hover:bg-zinc-500 rounded-r-md transition" title="Power Button (Screen On/Off)"></button>
+                            <button onclick="emulatorPhysicalButton('volUp')" class="w-2 h-7 bg-zinc-700 hover:bg-zinc-500 rounded-r-md transition mt-2" title="Volume Up"></button>
+                            <button onclick="emulatorPhysicalButton('volDown')" class="w-2 h-7 bg-zinc-700 hover:bg-zinc-500 rounded-r-md transition" title="Volume Down"></button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 2. GRADLE TASKS PANEL -->
+            <div id="right-view-gradle" class="hidden flex-1 flex-col overflow-hidden">
+                <div class="h-8 px-3 border-b border-darcula-border flex items-center justify-between text-xs font-semibold text-white shrink-0">
+                    <span>Gradle</span>
+                    <button onclick="closeRightDrawer()" class="p-1 text-darcula-textMuted hover:text-white"><i class="fas fa-times"></i></button>
+                </div>
+                <div class="p-3 space-y-2 text-xs overflow-y-auto">
+                    <div class="font-semibold text-white flex items-center gap-1.5">
+                        <i class="fas fa-cubes text-emerald-400"></i> MyApplication &gt; Tasks &gt; build
+                    </div>
+                    <div class="pl-3 space-y-1.5">
+                        <button onclick="runGradleTask('assembleDebug')" class="w-full text-left px-2.5 py-1.5 rounded bg-darcula-bg hover:bg-darcula-active border border-darcula-border flex items-center justify-between">
+                            <span class="font-mono text-darcula-cyan">assembleDebug</span>
+                            <i class="fas fa-play text-[10px] text-emerald-400"></i>
+                        </button>
+                        <button onclick="runGradleTask('clean')" class="w-full text-left px-2.5 py-1.5 rounded bg-darcula-bg hover:bg-darcula-active border border-darcula-border flex items-center justify-between">
+                            <span class="font-mono text-darcula-cyan">clean</span>
+                            <i class="fas fa-play text-[10px] text-emerald-400"></i>
+                        </button>
+                        <button onclick="runGradleTask('testDebugUnitTest')" class="w-full text-left px-2.5 py-1.5 rounded bg-darcula-bg hover:bg-darcula-active border border-darcula-border flex items-center justify-between">
+                            <span class="font-mono text-darcula-cyan">testDebugUnitTest</span>
+                            <i class="fas fa-play text-[10px] text-emerald-400"></i>
+                        </button>
+                        <button onclick="runGradleTask('lint')" class="w-full text-left px-2.5 py-1.5 rounded bg-darcula-bg hover:bg-darcula-active border border-darcula-border flex items-center justify-between">
+                            <span class="font-mono text-darcula-cyan">lint</span>
+                            <i class="fas fa-play text-[10px] text-emerald-400"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 3. GEMINI AI ASSISTANT IN ANDROID STUDIO -->
+            <div id="right-view-gemini" class="hidden flex-1 flex-col overflow-hidden">
+                <div class="h-8 px-3 border-b border-darcula-border flex items-center justify-between text-xs font-semibold text-white shrink-0">
+                    <span class="flex items-center gap-1.5"><i class="fas fa-wand-magic-sparkles text-darcula-cyan"></i> Gemini</span>
+                    <button onclick="closeRightDrawer()" class="p-1 text-darcula-textMuted hover:text-white"><i class="fas fa-times"></i></button>
+                </div>
+                <div id="gemini-chat-history" class="flex-1 p-3 overflow-y-auto space-y-2.5 text-xs">
+                    <div class="bg-darcula-bg border border-darcula-border rounded-xl p-2.5 text-darcula-text">
+                        Halo! Saya asisten Gemini di Android Studio. Pilih aksi cepat di bawah atau tanyakan seputar Kotlin &amp; Android XML:
+                    </div>
+                    <div class="flex flex-wrap gap-1.5">
+                        <button onclick="askGeminiPreset('counter')" class="px-2.5 py-1 rounded-lg bg-darcula-bg hover:bg-darcula-active border border-darcula-border text-[11px] text-darcula-cyan">Generate Counter Logic</button>
+                        <button onclick="askGeminiPreset('login_xml')" class="px-2.5 py-1 rounded-lg bg-darcula-bg hover:bg-darcula-active border border-darcula-border text-[11px] text-emerald-400">Buat Layout Login XML</button>
+                    </div>
+                </div>
+                <div class="p-2 border-t border-darcula-border flex gap-1.5">
+                    <input id="gemini-prompt-input" onkeydown="if(event.key==='Enter') sendGeminiPrompt()" type="text" placeholder="Ask Gemini..." class="flex-1 bg-darcula-bg border border-darcula-border rounded-lg px-2.5 py-1.5 text-xs text-white focus:outline-none focus:border-darcula-accent">
+                    <button onclick="sendGeminiPrompt()" class="px-3 py-1.5 rounded-lg bg-darcula-accent text-white text-xs"><i class="fas fa-paper-plane"></i></button>
+                </div>
+            </div>
+
+        </aside>
+
+        <!-- E. RIGHT TOOL WINDOW STRIPE (Vertical Bar Ikon) -->
+        <aside class="w-9 bg-darcula-stripe border-l border-darcula-border flex flex-col items-center py-2 gap-2 shrink-0 z-20">
+            <button onclick="toggleRightToolWindow('emulator')" id="stripe-right-emulator" class="w-7 h-7 rounded-md text-darcula-textMuted hover:bg-darcula-hover hover:text-white flex items-center justify-center text-xs transition" title="Running Devices (Emulator)">
+                <i class="fas fa-mobile-screen"></i>
+            </button>
+            <button onclick="toggleRightToolWindow('gradle')" id="stripe-right-gradle" class="w-7 h-7 rounded-md text-darcula-textMuted hover:bg-darcula-hover hover:text-white flex items-center justify-center text-xs transition" title="Gradle">
+                <i class="fas fa-cubes"></i>
+            </button>
+            <button onclick="toggleRightToolWindow('gemini')" id="stripe-right-gemini" class="w-7 h-7 rounded-md text-darcula-textMuted hover:bg-darcula-hover hover:text-white flex items-center justify-center text-xs transition" title="Gemini AI Assistant">
+                <i class="fas fa-wand-magic-sparkles"></i>
+            </button>
+        </aside>
+
+    </div>
+
+    <!-- ===================================================================== -->
+    <!-- 6. STATUS BAR PALING BAWAH                                            -->
+    <!-- ===================================================================== -->
+    <footer class="h-6 bg-darcula-panel border-t border-darcula-border px-3 flex items-center justify-between text-[11px] text-darcula-textMuted shrink-0">
+        <div class="flex items-center gap-2 truncate">
+            <i class="fas fa-check-circle text-emerald-400 text-[10px]"></i>
+            <span id="status-message" class="text-darcula-text truncate">Gradle sync finished in 1s 120ms</span>
+        </div>
+        <div class="flex items-center gap-3 shrink-0">
+            <span id="cursor-position" class="hidden sm:inline">Ln 1, Col 1</span>
+            <span>UTF-8</span>
+            <span id="file-encoding-type" class="text-darcula-cyan font-medium">KOTLIN</span>
+            <i class="fas fa-lock-open text-[10px]" title="File is writable"></i>
+        </div>
+    </footer>
+
+    <!-- ===================================================================== -->
+    <!-- MODALS: NEW FILE, SDK MANAGER, AVD MANAGER, SEARCH EVERYWHERE         -->
+    <!-- ===================================================================== -->
+
+    <!-- Modal: New File -->
+    <div id="modal-new-file" class="fixed inset-0 bg-black/70 z-50 hidden items-center justify-center p-4">
+        <div class="bg-darcula-panel border border-darcula-border rounded-xl w-full max-w-md shadow-2xl overflow-hidden">
+            <div class="px-4 py-3 border-b border-darcula-border flex items-center justify-between">
+                <h3 class="font-semibold text-sm text-white">New Android Component / File</h3>
+                <button onclick="closeNewFileModal()" class="text-darcula-textMuted hover:text-white"><i class="fas fa-times"></i></button>
+            </div>
+            <div class="p-4 space-y-3 text-xs">
+                <div>
+                    <label class="block text-darcula-textMuted mb-1">Jenis File</label>
+                    <select id="new-file-type" class="w-full bg-darcula-bg border border-darcula-border rounded-lg px-3 py-2 text-white">
+                        <option value="kt">Kotlin Class / Activity (.kt)</option>
+                        <option value="xml">Layout Resource File (.xml)</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-darcula-textMuted mb-1">Nama File</label>
+                    <input id="new-file-name" type="text" placeholder="Contoh: SecondActivity atau activity_second" class="w-full bg-darcula-bg border border-darcula-border rounded-lg px-3 py-2 text-white">
+                </div>
+                <p id="new-file-error" class="text-rose-400 text-[11px] hidden"></p>
+            </div>
+            <div class="px-4 py-3 bg-darcula-stripe border-t border-darcula-border flex justify-end gap-2 text-xs">
+                <button onclick="closeNewFileModal()" class="px-3 py-1.5 rounded-lg bg-darcula-panel border border-darcula-border text-darcula-text">Batal</button>
+                <button onclick="createNewFile()" class="px-3.5 py-1.5 rounded-lg bg-darcula-accent text-white font-semibold">OK</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal: SDK Manager -->
+    <div id="modal-sdk-manager" class="fixed inset-0 bg-black/70 z-50 hidden items-center justify-center p-4">
+        <div class="bg-darcula-panel border border-darcula-border rounded-xl w-full max-w-xl shadow-2xl overflow-hidden">
+            <div class="px-4 py-3 border-b border-darcula-border flex items-center justify-between bg-darcula-stripe">
+                <h3 class="font-semibold text-sm text-white flex items-center gap-2"><i class="fas fa-cubes text-darcula-cyan"></i> Android SDK Manager</h3>
+                <button onclick="document.getElementById('modal-sdk-manager').classList.add('hidden')" class="text-darcula-textMuted hover:text-white"><i class="fas fa-times"></i></button>
+            </div>
+            <div class="p-4 text-xs space-y-3">
+                <div class="bg-darcula-bg border border-darcula-border rounded-lg px-3 py-2 flex items-center justify-between">
+                    <span class="text-darcula-textMuted">Android SDK Location:</span>
+                    <span class="font-mono text-white">/Users/developer/Library/Android/sdk</span>
+                </div>
+                <div class="border border-darcula-border rounded-lg overflow-hidden">
+                    <table class="w-full text-left">
+                        <thead class="bg-darcula-stripe text-darcula-textMuted border-b border-darcula-border">
+                            <tr>
+                                <th class="p-2">Name</th>
+                                <th class="p-2">API Level</th>
+                                <th class="p-2">Status</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-darcula-border bg-darcula-bg">
+                            <tr>
+                                <td class="p-2 text-white"><input type="checkbox" checked class="mr-2 accent-blue-500">Android 15.0 ("VanillaIceCream")</td>
+                                <td class="p-2 font-mono">35</td>
+                                <td class="p-2 text-emerald-400">Installed</td>
+                            </tr>
+                            <tr>
+                                <td class="p-2 text-white"><input type="checkbox" checked class="mr-2 accent-blue-500">Android 14.0 ("UpsideDownCake")</td>
+                                <td class="p-2 font-mono">34</td>
+                                <td class="p-2 text-emerald-400">Installed</td>
+                            </tr>
+                            <tr>
+                                <td class="p-2 text-white"><input type="checkbox" class="mr-2 accent-blue-500">Android 13.0 ("Tiramisu")</td>
+                                <td class="p-2 font-mono">33</td>
+                                <td class="p-2 text-darcula-textMuted">Not installed</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            <div class="px-4 py-3 bg-darcula-stripe border-t border-darcula-border flex justify-end gap-2 text-xs">
+                <button onclick="document.getElementById('modal-sdk-manager').classList.add('hidden'); appendBuildLog('Android SDK packages verified and up to date.', 'success');" class="px-4 py-1.5 rounded-lg bg-darcula-accent text-white font-semibold">Apply &amp; OK</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal: AVD Device Manager -->
+    <div id="modal-avd-manager" class="fixed inset-0 bg-black/70 z-50 hidden items-center justify-center p-4">
+        <div class="bg-darcula-panel border border-darcula-border rounded-xl w-full max-w-lg shadow-2xl overflow-hidden">
+            <div class="px-4 py-3 border-b border-darcula-border flex items-center justify-between bg-darcula-stripe">
+                <h3 class="font-semibold text-sm text-white flex items-center gap-2"><i class="fas fa-mobile-retro text-amber-400"></i> Virtual Device Manager (AVD)</h3>
+                <button onclick="document.getElementById('modal-avd-manager').classList.add('hidden')" class="text-darcula-textMuted hover:text-white"><i class="fas fa-times"></i></button>
+            </div>
+            <div class="p-4 text-xs space-y-3">
+                <div class="space-y-2" id="avd-list">
+                    <div class="p-2.5 rounded-lg bg-darcula-bg border border-darcula-border flex items-center justify-between">
+                        <div>
+                            <div class="font-semibold text-white">Pixel 8 Pro API 35</div>
+                            <div class="text-[11px] text-darcula-textMuted">1344 x 2992 • 480dpi • Android 15.0 (x86_64)</div>
+                        </div>
+                        <button onclick="selectDeviceFromAvd('Pixel 8 Pro API 35')" class="px-2.5 py-1 rounded bg-emerald-600 text-white font-semibold"><i class="fas fa-play mr-1"></i>Launch</button>
+                    </div>
+                    <div class="p-2.5 rounded-lg bg-darcula-bg border border-darcula-border flex items-center justify-between">
+                        <div>
+                            <div class="font-semibold text-white">Galaxy S24 Ultra API 34</div>
+                            <div class="text-[11px] text-darcula-textMuted">1440 x 3120 • 560dpi • Android 14.0 (arm64)</div>
+                        </div>
+                        <button onclick="selectDeviceFromAvd('Galaxy S24 Ultra API 34')" class="px-2.5 py-1 rounded bg-emerald-600 text-white font-semibold"><i class="fas fa-play mr-1"></i>Launch</button>
+                    </div>
+                </div>
+                <div class="pt-2 border-t border-darcula-border flex gap-2">
+                    <input id="new-avd-name" type="text" placeholder="Nama AVD baru (mis. Pixel Tablet API 35)" class="flex-1 bg-darcula-bg border border-darcula-border rounded-lg px-3 py-1.5 text-white">
+                    <button onclick="createNewAvd()" class="px-3 py-1.5 rounded-lg bg-darcula-accent text-white font-semibold">+ Create Device</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal: Search Everywhere (Shift+Shift) -->
+    <div id="modal-search-everywhere" class="fixed inset-0 bg-black/60 z-50 hidden items-start justify-center pt-20 p-4">
+        <div class="bg-darcula-panel border border-darcula-border rounded-xl w-full max-w-lg shadow-2xl overflow-hidden">
+            <div class="px-3.5 py-2.5 border-b border-darcula-border flex items-center gap-2.5">
+                <i class="fas fa-magnifying-glass text-darcula-cyan"></i>
+                <input id="search-everywhere-input" onkeyup="filterSearchEverywhere()" type="text" placeholder="Search Everywhere (files, actions, classes)..." class="flex-1 bg-transparent text-sm text-white focus:outline-none">
+                <button onclick="closeSearchEverywhere()" class="text-xs text-darcula-textMuted hover:text-white">ESC</button>
+            </div>
+            <div id="search-everywhere-results" class="max-h-64 overflow-y-auto p-1.5 text-xs space-y-0.5">
+                <!-- Hasil pencarian dirender JS -->
+            </div>
+        </div>
+    </div>
+
+    <!-- ===================================================================== -->
+    <!-- JAVASCRIPT CORE ENGINE                                                -->
+    <!-- ===================================================================== -->
+    <script>
+        // ==========================================
+        // 1. STATE PROYEK & STRUKTUR FILE ANDROID
+        // ==========================================
+        let projectMeta = {
+            name: 'MyApplication',
+            packageName: 'com.example.myapp',
+            language: 'Kotlin',
+            minSdk: 24,
+            template: 'empty'
+        };
+
+        let projectFiles = {
+            'AndroidManifest.xml': {
+                name: 'AndroidManifest.xml',
+                folder: 'app/manifests',
+                lang: 'xml',
+                icon: 'fa-file-code text-orange-400',
+                dirty: false,
+                content: `<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    package="com.example.myapp">
+
+    <uses-permission android:name="android.permission.INTERNET" />
+
+    <application
+        android:allowBackup="true"
+        android:icon="@mipmap/ic_launcher"
+        android:label="@string/app_name"
+        android:theme="@style/Theme.MyApplication">
+        <activity
+            android:name=".MainActivity"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+    </application>
+</manifest>`
+            },
+            'MainActivity.kt': {
+                name: 'MainActivity.kt',
+                folder: 'app/kotlin+java/com.example.myapp',
+                lang: 'kotlin',
+                icon: 'fa-file-code text-purple-400',
+                dirty: false,
+                content: `package com.example.myapp
+
+import android.os.Bundle
+import android.util.Log
+import android.widget.Button
+import android.widget.TextView
+import android.widget.Toast
+import androidx.appcompat.app.AppCompatActivity
+
+class MainActivity : AppCompatActivity() {
+
+    private var counter = 0
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        setContentView(R.layout.activity_main)
+        Log.d("MainActivity", "onCreate: Activity berhasil dimuat")
+
+        val tvGreeting = findViewById<TextView>(R.id.tvGreeting)
+        val btnAction = findViewById<Button>(R.id.btnAction)
+
+        btnAction.setOnClickListener {
+            counter++
+            tvGreeting.text = "Halo Android! Tombol ditekan \$counter kali"
+            Log.i("MainActivity", "Tombol diklik ke-\$counter")
+            Toast.makeText(this, "Aksi dijalankan (\$counter)", Toast.LENGTH_SHORT).show()
+        }
+    }
+}`
+            },
+            'activity_main.xml': {
+                name: 'activity_main.xml',
+                folder: 'app/res/layout',
+                lang: 'xml',
+                icon: 'fa-table-cells-large text-emerald-400',
+                dirty: false,
+                content: `<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:padding="24dp">
+
+    <ImageView
+        android:id="@+id/ivAndroidLogo"
+        android:layout_width="76dp"
+        android:layout_height="76dp"
+        android:src="@drawable/ic_android"
+        android:tint="#10B981" />
+
+    <TextView
+        android:id="@+id/tvGreeting"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Selamat Datang di Android Studio!"
+        android:textSize="17sp"
+        android:textColor="#1E293B" />
+
+    <EditText
+        android:id="@+id/etInputName"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:hint="Masukkan nama Anda..." />
+
+    <Button
+        android:id="@+id/btnAction"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Jalankan Aksi"
+        android:backgroundTint="#4F46E5" />
+
+</androidx.constraintlayout.widget.ConstraintLayout>`
+            },
+            'strings.xml': {
+                name: 'strings.xml',
+                folder: 'app/res/values',
+                lang: 'xml',
+                icon: 'fa-file-lines text-sky-400',
+                dirty: false,
+                content: `<resources>
+    <string name="app_name">MyApplication</string>
+    <string name="welcome_msg">Selamat Datang di Android Studio!</string>
+    <string name="btn_label">Jalankan Aksi</string>
+</resources>`
+            },
+            'colors.xml': {
+                name: 'colors.xml',
+                folder: 'app/res/values',
+                lang: 'xml',
+                icon: 'fa-palette text-pink-400',
+                dirty: false,
+                content: `<resources>
+    <color name="purple_500">#FF6200EE</color>
+    <color name="indigo_600">#FF4F46E5</color>
+    <color name="emerald_500">#FF10B981</color>
+    <color name="amber_500">#FFF59E0B</color>
+    <color name="black">#FF000000</color>
+    <color name="white">#FFFFFFFF</color>
+</resources>`
+            },
+            'build.gradle.kts': {
+                name: 'build.gradle.kts',
+                folder: 'Gradle Scripts',
+                lang: 'kotlin',
+                icon: 'fa-cubes text-cyan-400',
+                dirty: false,
+                content: `plugins {
+    id("com.android.application")
+    id("org.jetbrains.kotlin.android")
+}
+
+android {
+    namespace = "com.example.myapp"
+    compileSdk = 35
+
+    defaultConfig {
+        applicationId = "com.example.myapp"
+        minSdk = 24
+        targetSdk = 35
+        versionCode = 1
+        versionName = "1.0"
+    }
+
+    buildFeatures {
+        viewBinding = true
+    }
+}
+
+dependencies {
+    implementation("androidx.core:core-ktx:1.13.1")
+    implementation("androidx.appcompat:appcompat:1.7.0")
+    implementation("com.google.android.material:material:1.12.0")
+    implementation("androidx.constraintlayout:constraintlayout:2.1.4")
+}`
+            }
+        };
+
+        let openTabs = ['MainActivity.kt', 'activity_main.xml', 'AndroidManifest.xml', 'build.gradle.kts'];
+        let activeFile = 'MainActivity.kt';
+        let editorMode = 'code'; // 'code' | 'split' | 'design'
+        let surfaceMode = 'design'; // 'design' | 'blueprint'
+        let designerZoom = 1.0;
+        let isPreviewDark = false;
+        let selectedWidgetIndex = null;
+        let isBottomCollapsed = false;
+        let isEmulatorScreenOn = true;
+        let isEmulatorLandscape = false;
+        let emulatorVolume = 75;
+        let emulatorClickCount = 0;
+        let logcatEntries = [];
+        let selectedWizardTemplate = 'empty';
+
+        // State Komponen UI untuk Designer & Emulator
+        let layoutWidgets = [
+            { id: 'ivAndroidLogo', type: 'ImageView', text: 'ic_android', color: '#10B981', size: 68 },
+            { id: 'tvGreeting', type: 'TextView', text: 'Selamat Datang di Android Studio!', color: '#1E293B', size: 16 },
+            { id: 'etInputName', type: 'EditText', text: '', hint: 'Masukkan nama Anda...', color: '#334155', size: 13 },
+            { id: 'btnAction', type: 'Button', text: 'Jalankan Aksi', color: '#4F46E5', size: 14 }
+        ];
+
+        // ==========================================
+        // 2. INISIALISASI IDE
+        // ==========================================
+        window.onload = function() {
+            renderProjectTree();
+            renderTabs();
+            loadFileIntoEditor(activeFile);
+            setupEditorListeners();
+            renderDesignerCanvas();
+            renderResourceColors();
+            updateStructureOutline();
+
+            // Shortcut Keyboard (Shift+Shift untuk Search Everywhere)
+            let lastShiftTime = 0;
+            window.addEventListener('keydown', (e) => {
+                if (e.key === 'Shift') {
+                    const now = Date.now();
+                    if (now - lastShiftTime < 350) {
+                        openSearchEverywhere();
+                    }
+                    lastShiftTime = now;
+                } else if (e.key === 'Escape') {
+                    closeSearchEverywhere();
+                    closeAllDropdowns();
+                }
+            });
+
+            // Tutup dropdown menu bar saat klik di luar
+            document.addEventListener('click', (e) => {
+                if (!e.target.closest('#ide-menubar')) {
+                    closeAllDropdowns();
+                }
+            });
+        };
+
+        // ==========================================
+        // 3. WELCOME SCREEN & NEW PROJECT WIZARD
+        // ==========================================
+        function openWelcomeScreen() {
+            const list = document.getElementById('recent-projects-list');
+            list.innerHTML = `
+                <div onclick="closeWelcomeScreen()" class="p-3 rounded-xl bg-darcula-panel hover:bg-darcula-hover border border-darcula-border flex items-center justify-between cursor-pointer transition">
+                    <div class="flex items-center gap-3">
+                        <div class="w-9 h-9 rounded-lg bg-emerald-600/20 text-emerald-400 font-bold flex items-center justify-center">
+                            ${projectMeta.name.substring(0, 2).toUpperCase()}
+                        </div>
+                        <div>
+                            <div class="font-semibold text-white text-xs">${projectMeta.name}</div>
+                            <div class="text-[11px] text-darcula-textMuted font-mono">~/AndroidStudioProjects/${projectMeta.name}</div>
+                        </div>
+                    </div>
+                    <span class="text-[11px] text-darcula-cyan">Open &rarr;</span>
+                </div>
+            `;
+            document.getElementById('welcome-screen').classList.remove('hidden');
+            document.getElementById('welcome-screen').classList.add('flex');
+        }
+
+        function closeWelcomeScreen() {
+            document.getElementById('welcome-screen').classList.add('hidden');
+            document.getElementById('welcome-screen').classList.remove('flex');
+        }
+
+        function openNewProjectWizard() {
+            document.getElementById('new-project-wizard').classList.remove('hidden');
+            document.getElementById('new-project-wizard').classList.add('flex');
+        }
+
+        function closeNewProjectWizard() {
+            document.getElementById('new-project-wizard').classList.add('hidden');
+            document.getElementById('new-project-wizard').classList.remove('flex');
+        }
+
+        function selectProjectTemplate(tpl) {
+            selectedWizardTemplate = tpl;
+            document.querySelectorAll('.tpl-card').forEach(card => {
+                if (card.dataset.tpl === tpl) {
+                    card.classList.remove('border', 'border-darcula-border');
+                    card.classList.add('border-2', 'border-darcula-accent');
+                } else {
+                    card.classList.remove('border-2', 'border-darcula-accent');
+                    card.classList.add('border', 'border-darcula-border');
+                }
+            });
+        }
+
+        function updateWizardPackage() {
+            const appName = document.getElementById('wiz-app-name').value.trim().toLowerCase().replace(/[^a-z0-9]/g, '') || 'myapp';
+            document.getElementById('wiz-package-name').value = `com.example.${appName}`;
+        }
+
+        function finishCreateProject() {
+            const appName = document.getElementById('wiz-app-name').value.trim() || 'MyAwesomeApp';
+            const pkg = document.getElementById('wiz-package-name').value.trim() || 'com.example.myawesomeapp';
+            const lang = document.getElementById('wiz-language').value;
+            const minSdk = document.getElementById('wiz-min-sdk').value;
+
+            projectMeta = { name: appName, packageName: pkg, language: lang, minSdk, template: selectedWizardTemplate };
+            document.getElementById('toolbar-project-name').textContent = appName;
+            document.getElementById('designer-appbar-title').textContent = appName;
+            document.getElementById('emulator-appbar-title').textContent = appName;
+
+            // Sesuaikan widget awal berdasarkan template pilihan
+            if (selectedWizardTemplate === 'login') {
+                layoutWidgets = [
+                    { id: 'tvLoginTitle', type: 'TextView', text: `Sign in to ${appName}`, color: '#1E293B', size: 18 },
+                    { id: 'etEmail', type: 'EditText', text: '', hint: 'Email address', color: '#334155', size: 13 },
+                    { id: 'etPassword', type: 'EditText', text: '', hint: 'Password', color: '#334155', size: 13 },
+                    { id: 'btnLogin', type: 'Button', text: 'Sign In', color: '#4F46E5', size: 14 }
+                ];
+            } else if (selectedWizardTemplate === 'bottom_nav') {
+                layoutWidgets = [
+                    { id: 'tvNavHeader', type: 'TextView', text: 'Home Dashboard Fragment', color: '#0F172A', size: 17 },
+                    { id: 'swNotif', type: 'Switch', text: 'Enable Push Notifications', color: '#10B981', size: 13 },
+                    { id: 'btnExplore', type: 'Button', text: 'Explore Items', color: '#059669', size: 14 }
+                ];
+            } else {
+                layoutWidgets = [
+                    { id: 'ivAndroidLogo', type: 'ImageView', text: 'ic_android', color: '#10B981', size: 68 },
+                    { id: 'tvGreeting', type: 'TextView', text: `Hello ${appName}!`, color: '#1E293B', size: 17 },
+                    { id: 'btnAction', type: 'Button', text: 'Click Me', color: '#4F46E5', size: 14 }
+                ];
+            }
+
+            // Update kode proyek
+            const mainFileName = lang === 'Java' ? 'MainActivity.java' : 'MainActivity.kt';
+            delete projectFiles['MainActivity.kt'];
+            delete projectFiles['MainActivity.java'];
+
+            projectFiles[mainFileName] = {
+                name: mainFileName,
+                folder: `app/kotlin+java/${pkg}`,
+                lang: lang.toLowerCase(),
+                icon: lang === 'Java' ? 'fa-file-code text-orange-400' : 'fa-file-code text-purple-400',
+                dirty: false,
+                content: lang === 'Java'
+                    ? `package ${pkg};\n\nimport android.os.Bundle;\nimport android.widget.Toast;\nimport androidx.appcompat.app.AppCompatActivity;\n\npublic class MainActivity extends AppCompatActivity {\n    @Override\n    protected void onCreate(Bundle savedInstanceState) {\n        super.onCreate(savedInstanceState);\n        setContentView(R.layout.activity_main);\n        Toast.makeText(this, "Welcome to ${appName}", Toast.LENGTH_SHORT).show();\n    }\n}`
+                    : `package ${pkg}\n\nimport android.os.Bundle\nimport android.util.Log\nimport android.widget.Toast\nimport androidx.appcompat.app.AppCompatActivity\n\nclass MainActivity : AppCompatActivity() {\n    override fun onCreate(savedInstanceState: Bundle?) {\n        super.onCreate(savedInstanceState)\n        setContentView(R.layout.activity_main)\n        Log.d("MainActivity", "Project ${appName} started")\n    }\n}`
+            };
+
+            projectFiles['build.gradle.kts'].content = projectFiles['build.gradle.kts'].content
+                .replace(/com\.example\.myapp/g, pkg)
+                .replace(/minSdk = \d+/, `minSdk = ${minSdk}`);
+
+            openTabs = [mainFileName, 'activity_main.xml', 'AndroidManifest.xml', 'build.gradle.kts'];
+            activeFile = mainFileName;
+
+            regenerateXmlFromWidgets();
+            renderDesignerCanvas();
+            renderProjectTree();
+            renderTabs();
+            loadFileIntoEditor(activeFile);
+
+            closeNewProjectWizard();
+            closeWelcomeScreen();
+            syncGradle();
+        }
+
+        function openVcsModal() {
+            closeWelcomeScreen();
+            switchBottomTab('terminal');
+            const history = document.getElementById('terminal-history');
+            history.innerHTML += `<div class="text-darcula-cyan">git clone https://github.com/android/architecture-samples.git — Repository ready!</div>`;
+        }
+
+        function openCustomizeThemeToast() {
+            appendBuildLog('Theme active: Darcula Dark (New UI Compact Mode)', 'info');
+        }
+
+        // ==========================================
+        // 4. TOP MENU BAR & SEARCH EVERYWHERE
+        // ==========================================
+        function toggleMenuDropdown(id) {
+            const target = document.getElementById(id);
+            const isHidden = target.classList.contains('hidden');
+            closeAllDropdowns();
+            if (isHidden) target.classList.remove('hidden');
+        }
+
+        function closeAllDropdowns() {
+            document.querySelectorAll('.ide-dropdown').forEach(el => el.classList.add('hidden'));
+        }
+
+        function openSearchEverywhere() {
+            const modal = document.getElementById('modal-search-everywhere');
+            modal.classList.remove('hidden');
+            modal.classList.add('flex');
+            const input = document.getElementById('search-everywhere-input');
+            input.value = '';
+            input.focus();
+            filterSearchEverywhere();
+        }
+
+        function closeSearchEverywhere() {
+            document.getElementById('modal-search-everywhere').classList.add('hidden');
+            document.getElementById('modal-search-everywhere').classList.remove('flex');
+        }
+
+        function filterSearchEverywhere() {
+            const q = document.getElementById('search-everywhere-input').value.toLowerCase();
+            const resultsEl = document.getElementById('search-everywhere-results');
+
+            const items = [
+                ...Object.values(projectFiles).map(f => ({ label: f.name, sub: f.folder, icon: f.icon, action: () => openFile(f.name) })),
+                { label: "Run 'app'", sub: "Action • Shift+F10", icon: "fa-play text-emerald-400", action: () => runApplication(false) },
+                { label: "Sync Project with Gradle Files", sub: "Action", icon: "fa-arrows-rotate text-emerald-400", action: () => syncGradle() },
+                { label: "SDK Manager", sub: "Tools", icon: "fa-cubes text-darcula-cyan", action: () => openSdkManagerModal() },
+                { label: "Virtual Device Manager (AVD)", sub: "Tools", icon: "fa-mobile-retro text-amber-400", action: () => openAvdManagerModal() },
+                { label: "New Project...", sub: "File", icon: "fa-plus text-darcula-accent", action: () => openNewProjectWizard() }
+            ];
+
+            const matched = items.filter(i => i.label.toLowerCase().includes(q) || i.sub.toLowerCase().includes(q));
+            resultsEl.innerHTML = matched.map((m, idx) => `
+                <div onclick="executeSearchItem(${idx})" class="search-item-row px-3 py-2 rounded-lg hover:bg-darcula-active cursor-pointer flex items-center justify-between">
+                    <div class="flex items-center gap-2.5">
+                        <i class="fas ${m.icon} w-4 text-center"></i>
+                        <span class="text-white font-medium">${m.label}</span>
+                    </div>
+                    <span class="text-[10px] text-darcula-textMuted">${m.sub}</span>
+                </div>
+            `).join('');
+
+            window._currentSearchResults = matched;
+        }
+
+        function executeSearchItem(idx) {
+            closeSearchEverywhere();
+            if (window._currentSearchResults && window._currentSearchResults[idx]) {
+                window._currentSearchResults[idx].action();
+            }
+        }
+
+        // ==========================================
+        // 5. LEFT TOOL WINDOWS (PROJECT / RESOURCES / STRUCTURE)
+        // ==========================================
+        function switchLeftToolWindow(view) {
+            ['project', 'resources', 'structure'].forEach(v => {
+                const btn = document.getElementById(`stripe-left-${v}`);
+                const pane = document.getElementById(`left-view-${v}`);
+                if (v === view) {
+                    btn.classList.add('bg-darcula-active', 'text-white');
+                    btn.classList.remove('text-darcula-textMuted');
+                    pane.classList.remove('hidden');
+                    pane.classList.add('flex');
+                } else {
+                    btn.classList.remove('bg-darcula-active', 'text-white');
+                    btn.classList.add('text-darcula-textMuted');
+                    pane.classList.add('hidden');
+                    pane.classList.remove('flex');
+                }
+            });
+
+            // Buka drawer di mobile jika sedang tertutup
+            if (window.innerWidth < 1024) {
+                const drawer = document.getElementById('left-tool-drawer');
+                if (drawer.classList.contains('-translate-x-[120%]')) {
+                    toggleLeftDrawerMobile();
+                }
+            }
+        }
+
+        function toggleLeftDrawerMobile() {
+            const drawer = document.getElementById('left-tool-drawer');
+            const backdrop = document.getElementById('left-drawer-backdrop');
+            const isClosed = drawer.classList.contains('-translate-x-[120%]');
+            if (isClosed) {
+                drawer.classList.remove('-translate-x-[120%]');
+                backdrop.classList.remove('hidden');
+            } else {
+                drawer.classList.add('-translate-x-[120%]');
+                backdrop.classList.add('hidden');
+            }
+        }
+
+        function renderProjectTree() {
+            const container = document.getElementById('file-tree-container');
+            const grouped = {};
+            Object.values(projectFiles).forEach(f => {
+                if (!grouped[f.folder]) grouped[f.folder] = [];
+                grouped[f.folder].push(f);
+            });
+
+            let html = `
+                <div class="font-semibold text-white flex items-center gap-1.5 py-1 px-1">
+                    <i class="fas fa-chevron-down text-[9px] text-darcula-textMuted"></i>
+                    <i class="fas fa-folder-open text-amber-400"></i>
+                    <span>app</span>
+                </div>
+                <div class="pl-3 space-y-1">
+            `;
+
+            Object.keys(grouped).filter(k => k.startsWith('app/')).forEach(folderKey => {
+                const shortName = folderKey.replace('app/', '');
+                html += `
+                    <div>
+                        <div class="flex items-center gap-1.5 py-0.5 px-1 text-darcula-text">
+                            <i class="fas fa-chevron-down text-[8px] text-darcula-textMuted"></i>
+                            <i class="fas fa-folder text-sky-400"></i>
+                            <span class="truncate">${shortName}</span>
+                        </div>
+                        <div class="pl-4 space-y-0.5 mt-0.5">
+                            ${grouped[folderKey].map(f => renderTreeItem(f)).join('')}
+                        </div>
+                    </div>
+                `;
+            });
+
+            html += `</div>`;
+
+            if (grouped['Gradle Scripts']) {
+                html += `
+                    <div class="pt-1.5">
+                        <div class="font-semibold text-white flex items-center gap-1.5 py-1 px-1">
+                            <i class="fas fa-chevron-down text-[9px] text-darcula-textMuted"></i>
+                            <i class="fas fa-cubes text-emerald-400"></i>
+                            <span>Gradle Scripts</span>
+                        </div>
+                        <div class="pl-4 space-y-0.5 mt-0.5">
+                            ${grouped['Gradle Scripts'].map(f => renderTreeItem(f)).join('')}
+                        </div>
+                    </div>
+                `;
+            }
+
+            container.innerHTML = html;
+        }
+
+        function renderTreeItem(file) {
+            const isActive = file.name === activeFile;
+            const canDelete = !['AndroidManifest.xml', 'activity_main.xml', 'build.gradle.kts'].includes(file.name);
+            return `
+                <div onclick="openFile('${file.name}')" class="group flex items-center justify-between py-1 px-2 rounded cursor-pointer transition ${isActive ? 'bg-darcula-active text-white font-medium' : 'text-darcula-text hover:bg-darcula-hover'}">
+                    <div class="flex items-center gap-2 truncate">
+                        <i class="fas ${file.icon} text-xs w-3.5 text-center"></i>
+                        <span class="truncate">${file.name}</span>
+                    </div>
+                    ${canDelete ? `<button onclick="deleteProjectFile(event, '${file.name}')" class="opacity-0 group-hover:opacity-100 text-darcula-textMuted hover:text-rose-400 px-1" title="Delete File"><i class="fas fa-trash text-[10px]"></i></button>` : ''}
+                </div>
+            `;
+        }
+
+        function deleteProjectFile(e, fileName) {
+            e.stopPropagation();
+            delete projectFiles[fileName];
+            openTabs = openTabs.filter(t => t !== fileName);
+            if (activeFile === fileName) {
+                activeFile = openTabs[0] || 'activity_main.xml';
+            }
+            renderProjectTree();
+            renderTabs();
+            loadFileIntoEditor(activeFile);
+            appendBuildLog(`Deleted file: ${fileName}`, 'muted');
+        }
+
+        function renderResourceColors() {
+            const colors = [
+                { name: 'indigo_600', hex: '#4F46E5' },
+                { name: 'emerald_500', hex: '#10B981' },
+                { name: 'amber_500', hex: '#F59E0B' },
+                { name: 'rose_500', hex: '#F43F5E' }
+            ];
+            document.getElementById('resource-colors-grid').innerHTML = colors.map(c => `
+                <div onclick="applyColorResource('${c.hex}')" class="p-2 rounded-lg bg-darcula-bg hover:bg-darcula-hover border border-darcula-border cursor-pointer flex items-center gap-2">
+                    <span class="w-4 h-4 rounded shrink-0 border border-white/20" style="background:${c.hex}"></span>
+                    <span class="truncate text-[11px] text-white">${c.name}</span>
+                </div>
+            `).join('');
+        }
+
+        function applyColorResource(hex) {
+            if (selectedWidgetIndex !== null && layoutWidgets[selectedWidgetIndex]) {
+                updateWidgetProp('color', hex);
+            } else {
+                appendBuildLog(`Color ${hex} copied. Pilih widget di Layout Designer untuk menerapkan warna.`, 'info');
+            }
+        }
+
+        function insertDrawableToLayout(iconClass, color) {
+            addWidgetToLayout('ImageView');
+            layoutWidgets[layoutWidgets.length - 1].color = color;
+            renderDesignerCanvas();
+            regenerateXmlFromWidgets();
+        }
+
+        function updateStructureOutline() {
+            const container = document.getElementById('structure-tree-list');
+            const file = projectFiles[activeFile];
+            if (!file) return;
+
+            if (file.lang === 'xml') {
+                container.innerHTML = `
+                    <div class="text-darcula-cyan font-semibold"><i class="fas fa-code mr-1.5"></i>Root XML Layout</div>
+                    <div class="pl-3 space-y-1 mt-1">
+                        ${layoutWidgets.map(w => `<div class="text-darcula-text"><span class="text-amber-400">&lt;${w.type}&gt;</span> @id/${w.id}</div>`).join('')}
+                    </div>
+                `;
+            } else {
+                const fnMatches = [...file.content.matchAll(/fun\s+(\w+)\s*\(/g)];
+                const classMatches = [...file.content.matchAll(/class\s+(\w+)/g)];
+                container.innerHTML = `
+                    ${classMatches.map(c => `<div class="text-purple-400 font-semibold"><i class="fas fa-copyright mr-1.5"></i>${c[1]}</div>`).join('')}
+                    <div class="pl-3 space-y-1 mt-1">
+                        ${fnMatches.length > 0
+                            ? fnMatches.map(f => `<div class="text-darcula-cyan"><i class="fas fa-bolt text-amber-400 mr-1.5"></i>${f[1]}()</div>`).join('')
+                            : '<div class="text-darcula-textMuted italic">No methods found</div>'}
+                    </div>
+                `;
+            }
+        }
+
+        // ==========================================
+        // 6. EDITOR, SYNTAX HIGHLIGHT & CODE ANALYSIS
+        // ==========================================
+        function openFile(fileName) {
+            if (!projectFiles[fileName]) return;
+            if (!openTabs.includes(fileName)) openTabs.push(fileName);
+            activeFile = fileName;
+
+            if (fileName.endsWith('.xml') && fileName !== 'AndroidManifest.xml') {
+                if (window.innerWidth >= 768 && editorMode === 'code') setEditorMode('split');
+            } else if (editorMode !== 'code') {
+                setEditorMode('code');
+            }
+
+            renderProjectTree();
+            renderTabs();
+            loadFileIntoEditor(fileName);
+            updateStructureOutline();
+
+            if (window.innerWidth < 1024) {
+                const drawer = document.getElementById('left-tool-drawer');
+                if (!drawer.classList.contains('-translate-x-[120%]')) toggleLeftDrawerMobile();
+            }
+        }
+
+        function closeTab(e, fileName) {
+            e.stopPropagation();
+            if (openTabs.length === 1) return;
+            openTabs = openTabs.filter(t => t !== fileName);
+            if (activeFile === fileName) activeFile = openTabs[openTabs.length - 1];
+            renderProjectTree();
+            renderTabs();
+            loadFileIntoEditor(activeFile);
+        }
+
+        function renderTabs() {
+            document.getElementById('editor-tabs').innerHTML = openTabs.map(name => {
+                const f = projectFiles[name];
+                const isActive = name === activeFile;
+                return `
+                    <div onclick="openFile('${name}')" class="h-full px-3 flex items-center gap-2 border-r border-darcula-border text-xs cursor-pointer shrink-0 transition ${isActive ? 'bg-darcula-bg text-white border-t-2 border-t-darcula-accent font-medium' : 'bg-darcula-panel text-darcula-textMuted hover:bg-darcula-hover'}">
+                        <i class="fas ${f.icon} text-[11px]"></i>
+                        <span>${name}</span>
+                        ${f.dirty ? '<span class="w-1.5 h-1.5 rounded-full bg-darcula-cyan"></span>' : ''}
+                        <button onclick="closeTab(event, '${name}')" class="ml-1 hover:text-rose-400 rounded p-0.5"><i class="fas fa-times text-[10px]"></i></button>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        function loadFileIntoEditor(fileName) {
+            const f = projectFiles[fileName];
+            if (!f) return;
+            document.getElementById('code-editor-textarea').value = f.content;
+            document.getElementById('breadcrumb-path').textContent = `${f.folder.replace(/\//g, ' > ')} > ${f.name}`;
+            document.getElementById('file-encoding-type').textContent = f.lang.toUpperCase();
+
+            const isLayoutXml = fileName.endsWith('.xml') && fileName !== 'AndroidManifest.xml';
+            const switcher = document.getElementById('view-mode-switcher');
+            if (isLayoutXml) {
+                switcher.classList.remove('opacity-40', 'pointer-events-none');
+            } else {
+                switcher.classList.add('opacity-40', 'pointer-events-none');
+                if (editorMode !== 'code') setEditorMode('code');
+            }
+
+            updateCodeDisplay();
+            analyzeCodeProblems();
+        }
+
+        function setupEditorListeners() {
+            const ta = document.getElementById('code-editor-textarea');
+            const hl = document.getElementById('code-highlight-layer');
+            const ln = document.getElementById('line-numbers');
+
+            ta.addEventListener('input', () => {
+                projectFiles[activeFile].content = ta.value;
+                projectFiles[activeFile].dirty = true;
+                renderTabs();
+                updateCodeDisplay();
+                updateStructureOutline();
+                analyzeCodeProblems();
+                if (activeFile === 'activity_main.xml') {
+                    syncXmlToDesignerWidgets(ta.value);
+                }
+            });
+
+            ta.addEventListener('scroll', () => {
+                hl.scrollTop = ta.scrollTop;
+                hl.scrollLeft = ta.scrollLeft;
+                ln.scrollTop = ta.scrollTop;
+            });
+
+            ta.addEventListener('keyup', updateCursorPos);
+            ta.addEventListener('click', updateCursorPos);
+
+            ta.addEventListener('keydown', function(e) {
+                if (e.key === 'Tab') {
+                    e.preventDefault();
+                    const s = this.selectionStart;
+                    const end = this.selectionEnd;
+                    this.value = this.value.substring(0, s) + "    " + this.value.substring(end);
+                    this.selectionStart = this.selectionEnd = s + 4;
+                    projectFiles[activeFile].content = this.value;
+                    updateCodeDisplay();
+                }
+            });
+        }
+
+        function updateCursorPos() {
+            const ta = document.getElementById('code-editor-textarea');
+            const lines = ta.value.substring(0, ta.selectionStart).split('\n');
+            document.getElementById('cursor-position').textContent = `Ln ${lines.length}, Col ${lines[lines.length - 1].length + 1}`;
+        }
+
+        function updateCodeDisplay() {
+            const ta = document.getElementById('code-editor-textarea');
+            const hl = document.getElementById('code-highlight-layer');
+            const ln = document.getElementById('line-numbers');
+            const code = ta.value;
+
+            const count = code.split('\n').length;
+            ln.innerHTML = Array.from({ length: count }, (_, i) => i + 1).join('<br>');
+            hl.innerHTML = applyDarculaSyntax(code, projectFiles[activeFile].lang) + '\n';
+        }
+
+        function applyDarculaSyntax(code, lang) {
+            let esc = code.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+            if (lang === 'xml') {
+                esc = esc.replace(/(&lt;\/?)([\w:.-]+)/g, '$1<span class="text-[#E8BF6A]">$2</span>');
+                esc = esc.replace(/(\s)([\w:-]+)(=)/g, '$1<span class="text-[#BABABA]">$2</span>$3');
+                esc = esc.replace(/(".*?")/g, '<span class="text-[#6A8759]">$1</span>');
+            } else {
+                esc = esc.replace(/(".*?")/g, '<span class="text-[#6A8759]">$1</span>');
+                esc = esc.replace(/(\/\/.*)/g, '<span class="text-[#808080] italic">$1</span>');
+                const kw = /\b(package|import|class|public|private|protected|fun|val|var|override|void|return|if|else|true|false|null|plugins|android|defaultConfig|buildFeatures|dependencies|implementation|id)\b/g;
+                esc = esc.replace(kw, '<span class="text-[#CF8E6D] font-semibold">$1</span>');
+                esc = esc.replace(/\b(Bundle|Button|TextView|EditText|ImageView|Switch|CheckBox|Toast|Log|AppCompatActivity|String|Int)\b/g, '<span class="text-[#56A8F5]">$1</span>');
+                esc = esc.replace(/\b(\d+)\b/g, '<span class="text-[#6897BB]">$1</span>');
+            }
+            return esc;
+        }
+
+        function insertCodeSnippet(type) {
+            const ta = document.getElementById('code-editor-textarea');
+            const snippets = {
+                toast: `\n        Toast.makeText(this, "Pesan Toast Baru", Toast.LENGTH_SHORT).show()`,
+                logd: `\n        Log.d("MyTag", "Debug log dijalankan")`,
+                click: `\n        btnAction.setOnClickListener {\n            Toast.makeText(this, "Tombol ditekan!", Toast.LENGTH_SHORT).show()\n        }`
+            };
+            const pos = ta.selectionStart;
+            const snippet = snippets[type] || '';
+            ta.value = ta.value.substring(0, pos) + snippet + ta.value.substring(ta.selectionEnd);
+            projectFiles[activeFile].content = ta.value;
+            updateCodeDisplay();
+            ta.focus();
+        }
+
+        function saveAllFiles() {
+            Object.values(projectFiles).forEach(f => f.dirty = false);
+            renderTabs();
+            document.getElementById('status-message').textContent = 'All project files saved.';
+        }
+
+        function analyzeCodeProblems() {
+            const problems = [];
+            Object.values(projectFiles).forEach(file => {
+                if (file.lang === 'kotlin' || file.lang === 'java') {
+                    const openBraces = (file.content.match(/\{/g) || []).length;
+                    const closeBraces = (file.content.match(/\}/g) || []).length;
+                    if (openBraces !== closeBraces) {
+                        problems.push({ file: file.name, msg: `Unbalanced curly braces '{' (${openBraces}) and '}' (${closeBraces})` });
+                    }
+                } else if (file.lang === 'xml') {
+                    const parser = new DOMParser();
+                    const doc = parser.parseFromString(file.content, 'text/xml');
+                    if (doc.querySelector('parsererror')) {
+                        problems.push({ file: file.name, msg: 'XML Syntax Error: Tag tidak valid atau belum ditutup dengan benar.' });
+                    }
+                }
+            });
+
+            const badge = document.getElementById('problems-count-badge');
+            const list = document.getElementById('content-bottom-problems');
+            badge.textContent = problems.length;
+
+            if (problems.length === 0) {
+                badge.className = 'px-1.5 py-0.2 rounded-full bg-darcula-bg text-[10px] text-darcula-textMuted';
+                list.innerHTML = `<div class="text-emerald-400"><i class="fas fa-check-circle mr-1.5"></i>No problems found in project files.</div>`;
+            } else {
+                badge.className = 'px-1.5 py-0.2 rounded-full bg-rose-600 text-[10px] text-white font-bold';
+                list.innerHTML = problems.map(p => `
+                    <div onclick="openFile('${p.file}')" class="p-1.5 rounded bg-rose-500/10 border border-rose-500/30 text-rose-300 cursor-pointer hover:bg-rose-500/20">
+                        <i class="fas fa-circle-xmark text-rose-400 mr-1.5"></i><strong>${p.file}:</strong> ${p.msg}
+                    </div>
+                `).join('');
+            }
+            return problems;
+        }
+
+        // ==========================================
+        // 7. VISUAL LAYOUT DESIGNER (2D PREVIEW)
+        // ==========================================
+        function setEditorMode(mode) {
+            editorMode = mode;
+            const pCode = document.getElementById('pane-code-editor');
+            const pDesign = document.getElementById('pane-layout-designer');
+            ['code', 'split', 'design'].forEach(m => {
+                const btn = document.getElementById(`mode-btn-${m}`);
+                btn.classList.toggle('bg-darcula-active', m === mode);
+                btn.classList.toggle('text-white', m === mode);
+                btn.classList.toggle('text-darcula-textMuted', m !== mode);
+            });
+
+            if (mode === 'code') {
+                pCode.classList.remove('hidden'); pCode.classList.add('flex');
+                pDesign.classList.add('hidden'); pDesign.classList.remove('flex');
+            } else if (mode === 'design') {
+                pCode.classList.add('hidden'); pCode.classList.remove('flex');
+                pDesign.classList.remove('hidden'); pDesign.classList.add('flex');
+                renderDesignerCanvas();
+            } else {
+                pCode.classList.remove('hidden'); pCode.classList.add('flex');
+                pDesign.classList.remove('hidden'); pDesign.classList.add('flex');
+                renderDesignerCanvas();
+            }
+        }
+
+        function setSurfaceMode(mode) {
+            surfaceMode = mode;
+            const screenBg = document.getElementById('designer-screen-bg');
+            document.getElementById('surf-btn-design').className = mode === 'design' ? 'px-2 py-0.5 rounded bg-darcula-active text-white text-[11px]' : 'px-2 py-0.5 rounded bg-darcula-bg text-darcula-textMuted text-[11px]';
+            document.getElementById('surf-btn-blueprint').className = mode === 'blueprint' ? 'px-2 py-0.5 rounded bg-darcula-active text-white text-[11px]' : 'px-2 py-0.5 rounded bg-darcula-bg text-darcula-textMuted text-[11px]';
+            screenBg.classList.toggle('blueprint-surface', mode === 'blueprint');
+        }
+
+        function togglePreviewTheme() {
+            isPreviewDark = !isPreviewDark;
+            const screenBg = document.getElementById('designer-screen-bg');
+            const icon = document.getElementById('icon-preview-theme');
+            if (isPreviewDark) {
+                screenBg.classList.remove('bg-white', 'text-zinc-900');
+                screenBg.classList.add('bg-zinc-900', 'text-white');
+                icon.className = 'fas fa-moon text-darcula-cyan';
+            } else {
+                screenBg.classList.remove('bg-zinc-900', 'text-white');
+                screenBg.classList.add('bg-white', 'text-zinc-900');
+                icon.className = 'fas fa-sun text-amber-400';
+            }
+        }
+
+        function changeDesignerZoom(delta) {
+            designerZoom = Math.min(1.4, Math.max(0.6, +(designerZoom + delta).toFixed(1)));
+            document.getElementById('designer-zoom-label').textContent = `${Math.round(designerZoom * 100)}%`;
+            document.getElementById('designer-zoom-wrapper').style.transform = `scale(${designerZoom})`;
+        }
+
+        function renderDesignerCanvas() {
+            const canvas = document.getElementById('designer-canvas-area');
+            const treeList = document.getElementById('component-tree-list');
+
+            canvas.innerHTML = layoutWidgets.map((w, i) => {
+                const ring = i === selectedWidgetIndex ? 'ring-2 ring-darcula-accent ring-offset-1' : 'hover:ring-1 hover:ring-sky-400';
+                if (w.type === 'ImageView') {
+                    return `<div onclick="selectWidget(${i})" class="bp-widget p-2 rounded-xl cursor-pointer flex items-center justify-center ${ring}" style="width:${w.size}px;height:${w.size}px;background:rgba(16,185,129,0.12)"><i class="fab fa-android text-3xl" style="color:${w.color}"></i></div>`;
+                } else if (w.type === 'TextView') {
+                    return `<div onclick="selectWidget(${i})" class="bp-widget px-2 py-0.5 rounded cursor-pointer text-center font-medium ${ring}" style="color:${w.color};font-size:${w.size}px">${w.text}</div>`;
+                } else if (w.type === 'EditText') {
+                    return `<div onclick="selectWidget(${i})" class="bp-widget w-full px-2.5 py-1.5 rounded border border-zinc-300 text-zinc-400 text-left cursor-pointer ${ring}" style="font-size:${w.size}px">${w.hint || 'EditText'}</div>`;
+                } else if (w.type === 'Switch' || w.type === 'CheckBox') {
+                    return `<div onclick="selectWidget(${i})" class="bp-widget flex items-center gap-2 px-2 py-1 rounded cursor-pointer ${ring}" style="font-size:${w.size}px;color:${w.color}"><i class="fas ${w.type === 'Switch' ? 'fa-toggle-on' : 'fa-check-square'}"></i><span>${w.text}</span></div>`;
+                } else {
+                    return `<button onclick="selectWidget(${i})" class="bp-widget px-4 py-1.5 rounded-lg text-white font-semibold shadow-sm cursor-pointer ${ring}" style="background:${w.color};font-size:${w.size}px">${w.text}</button>`;
+                }
+            }).join('');
+
+            treeList.innerHTML = layoutWidgets.map((w, i) => `
+                <div onclick="selectWidget(${i})" class="px-1.5 py-0.5 rounded cursor-pointer truncate ${i === selectedWidgetIndex ? 'bg-darcula-active text-white' : 'text-darcula-text hover:bg-darcula-hover'}">
+                    ${w.type} <span class="text-darcula-textMuted">(${w.id})</span>
+                </div>
+            `).join('');
+
+            renderAttributesInspector();
+            updateStructureOutline();
+        }
+
+        function selectWidget(idx) {
+            selectedWidgetIndex = idx;
+            renderDesignerCanvas();
+        }
+
+        function renderAttributesInspector() {
+            const badge = document.getElementById('selected-widget-type');
+            const fields = document.getElementById('attribute-fields');
+            if (selectedWidgetIndex === null || !layoutWidgets[selectedWidgetIndex]) {
+                badge.textContent = 'None';
+                fields.innerHTML = `<p class="text-[11px] italic">Klik komponen UI di layar desain untuk mengedit atribut Android-nya.</p>`;
+                return;
+            }
+            const w = layoutWidgets[selectedWidgetIndex];
+            badge.textContent = w.type;
+            fields.innerHTML = `
+                <div>
+                    <label class="block text-[10px] text-darcula-textMuted mb-0.5">id</label>
+                    <input type="text" value="${w.id}" onchange="updateWidgetProp('id', this.value)" class="w-full bg-darcula-bg border border-darcula-border rounded px-2 py-1 text-white font-mono text-[11px]">
+                </div>
+                ${w.type !== 'ImageView' ? `
+                <div>
+                    <label class="block text-[10px] text-darcula-textMuted mb-0.5">${w.type === 'EditText' ? 'hint' : 'text'}</label>
+                    <input type="text" value="${w.type === 'EditText' ? (w.hint || '') : w.text}" oninput="updateWidgetProp('${w.type === 'EditText' ? 'hint' : 'text'}', this.value)" class="w-full bg-darcula-bg border border-darcula-border rounded px-2 py-1 text-white text-xs">
+                </div>` : ''}
+                <div class="flex gap-2">
+                    <div class="flex-1">
+                        <label class="block text-[10px] text-darcula-textMuted mb-0.5">color / tint</label>
+                        <input type="color" value="${w.color}" oninput="updateWidgetProp('color', this.value)" class="w-full h-7 bg-darcula-bg border border-darcula-border rounded cursor-pointer">
+                    </div>
+                    <div class="w-16">
+                        <label class="block text-[10px] text-darcula-textMuted mb-0.5">size</label>
+                        <input type="number" value="${w.size}" oninput="updateWidgetProp('size', parseInt(this.value)||14)" class="w-full bg-darcula-bg border border-darcula-border rounded px-1.5 py-1 text-white text-xs">
+                    </div>
+                </div>
+                <div class="pt-2 border-t border-darcula-border flex justify-between">
+                    <button onclick="moveWidget(-1)" class="px-2 py-1 rounded bg-darcula-bg border border-darcula-border text-darcula-text" title="Move Up"><i class="fas fa-arrow-up"></i></button>
+                    <button onclick="moveWidget(1)" class="px-2 py-1 rounded bg-darcula-bg border border-darcula-border text-darcula-text" title="Move Down"><i class="fas fa-arrow-down"></i></button>
+                    <button onclick="deleteSelectedWidget()" class="px-2.5 py-1 rounded bg-rose-600/20 border border-rose-500/40 text-rose-400"><i class="fas fa-trash mr-1"></i>Delete</button>
+                </div>
+            `;
+        }
+
+        function updateWidgetProp(prop, val) {
+            if (selectedWidgetIndex === null) return;
+            layoutWidgets[selectedWidgetIndex][prop] = val;
+            renderDesignerCanvas();
+            regenerateXmlFromWidgets();
+        }
+
+        function addWidgetToLayout(type) {
+            const n = layoutWidgets.length + 1;
+            layoutWidgets.push({
+                id: `${type.toLowerCase()}${n}`,
+                type,
+                text: type === 'Button' ? `Button ${n}` : (type === 'Switch' ? 'Toggle Switch' : (type === 'CheckBox' ? 'Option Item' : `TextView ${n}`)),
+                hint: type === 'EditText' ? 'Enter text here...' : '',
+                color: type === 'Button' ? '#4F46E5' : (type === 'ImageView' ? '#10B981' : '#1E293B'),
+                size: type === 'ImageView' ? 64 : 14
+            });
+            selectedWidgetIndex = layoutWidgets.length - 1;
+            renderDesignerCanvas();
+            regenerateXmlFromWidgets();
+        }
+
+        function deleteSelectedWidget() {
+            if (selectedWidgetIndex === null) return;
+            layoutWidgets.splice(selectedWidgetIndex, 1);
+            selectedWidgetIndex = null;
+            renderDesignerCanvas();
+            regenerateXmlFromWidgets();
+        }
+
+        function moveWidget(dir) {
+            if (selectedWidgetIndex === null) return;
+            const ni = selectedWidgetIndex + dir;
+            if (ni < 0 || ni >= layoutWidgets.length) return;
+            [layoutWidgets[selectedWidgetIndex], layoutWidgets[ni]] = [layoutWidgets[ni], layoutWidgets[selectedWidgetIndex]];
+            selectedWidgetIndex = ni;
+            renderDesignerCanvas();
+            regenerateXmlFromWidgets();
+        }
+
+        function regenerateXmlFromWidgets() {
+            const body = layoutWidgets.map(w => {
+                if (w.type === 'ImageView') {
+                    return `    <ImageView\n        android:id="@+id/${w.id}"\n        android:layout_width="${w.size}dp"\n        android:layout_height="${w.size}dp"\n        android:src="@drawable/ic_android"\n        android:tint="${w.color}" />`;
+                } else if (w.type === 'EditText') {
+                    return `    <EditText\n        android:id="@+id/${w.id}"\n        android:layout_width="match_parent"\n        android:layout_height="wrap_content"\n        android:hint="${w.hint || ''}" />`;
+                } else if (w.type === 'Button') {
+                    return `    <Button\n        android:id="@+id/${w.id}"\n        android:layout_width="wrap_content"\n        android:layout_height="wrap_content"\n        android:text="${w.text}"\n        android:backgroundTint="${w.color}" />`;
+                } else {
+                    return `    <${w.type}\n        android:id="@+id/${w.id}"\n        android:layout_width="wrap_content"\n        android:layout_height="wrap_content"\n        android:text="${w.text}"\n        android:textSize="${w.size}sp"\n        android:textColor="${w.color}" />`;
+                }
+            }).join('\n\n');
+
+            const xml = `<?xml version="1.0" encoding="utf-8"?>\n<androidx.constraintlayout.widget.ConstraintLayout\n    xmlns:android="http://schemas.android.com/apk/res/android"\n    android:layout_width="match_parent"\n    android:layout_height="match_parent"\n    android:padding="24dp">\n\n${body}\n\n</androidx.constraintlayout.widget.ConstraintLayout>`;
+            projectFiles['activity_main.xml'].content = xml;
+            if (activeFile === 'activity_main.xml') {
+                document.getElementById('code-editor-textarea').value = xml;
+                updateCodeDisplay();
+            }
+        }
+
+        function syncXmlToDesignerWidgets(xml) {
+            const doc = new DOMParser().parseFromString(xml, 'text/xml');
+            if (doc.querySelector('parsererror')) return;
+            const els = doc.querySelectorAll('TextView, Button, EditText, ImageView, Switch, CheckBox');
+            if (els.length === 0) return;
+
+            layoutWidgets = Array.from(els).map((el, idx) => {
+                const tag = el.tagName;
+                const id = (el.getAttribute('android:id') || `@+id/view_${idx}`).replace('@+id/', '').replace('@id/', '');
+                const text = el.getAttribute('android:text') || tag;
+                const hint = el.getAttribute('android:hint') || '';
+                const color = el.getAttribute('android:backgroundTint') || el.getAttribute('android:textColor') || el.getAttribute('android:tint') || (tag === 'Button' ? '#4F46E5' : '#1E293B');
+                const size = parseInt(el.getAttribute('android:textSize') || el.getAttribute('android:layout_width')) || (tag === 'ImageView' ? 68 : 14);
+                return { id, type: tag, text, hint, color, size };
+            });
+            renderDesignerCanvas();
+        }
+
+        // ==========================================
+        // 8. GRADLE BUILD, RUN APP & EMULATOR LIVE
+        // ==========================================
+        function syncGradle() {
+            const icon = document.getElementById('icon-sync');
+            icon.classList.add('fa-spin');
+            switchBottomTab('build');
+            appendBuildLog('Starting Gradle Sync...', 'info');
+            setTimeout(() => {
+                appendBuildLog('CONFIGURE SUCCESSFUL in 940ms', 'success');
+                document.getElementById('status-message').textContent = 'Gradle sync finished in 940ms';
+                icon.classList.remove('fa-spin');
+            }, 900);
+        }
+
+        function runGradleTask(taskName) {
+            switchBottomTab('build');
+            appendBuildLog(`Executing Gradle task: :app:${taskName}...`, 'info');
+            setTimeout(() => {
+                appendBuildLog(`> Task :app:${taskName}`, 'muted');
+                appendBuildLog(`BUILD SUCCESSFUL in 1s 210ms`, 'success');
+            }, 800);
+        }
+
+        function runApplication(isDebug = false) {
+            const problems = analyzeCodeProblems();
+            switchBottomTab('build');
+            clearBottomLogs();
+
+            const device = document.getElementById('device-selector').value;
+            appendBuildLog(`Executing tasks: [:app:assembleDebug] on ${device}...`, 'info');
+
+            if (problems.length > 0) {
+                setTimeout(() => {
+                    problems.forEach(p => appendBuildLog(`e: ${p.file}: ${p.msg}`, 'error'));
+                    appendBuildLog(`BUILD FAILED with ${problems.length} error(s). Perbaiki kode terlebih dahulu!`, 'error');
+                    switchBottomTab('problems');
+                }, 600);
+                return;
+            }
+
+            setTimeout(() => appendBuildLog('> Task :app:compileDebugKotlin UP-TO-DATE', 'muted'), 400);
+            setTimeout(() => appendBuildLog('> Task :app:mergeDebugResources', 'muted'), 800);
+            setTimeout(() => appendBuildLog('> Task :app:packageDebug', 'muted'), 1200);
+            setTimeout(() => {
+                appendBuildLog('BUILD SUCCESSFUL in 1s 540ms', 'success');
+                appendBuildLog(`Launching '${projectMeta.packageName}/.MainActivity' on ${device}`, 'success');
+
+                document.getElementById('btn-stop-app').classList.remove('hidden');
+                document.getElementById('status-message').textContent = `${isDebug ? 'Debugging' : 'Running'} 'app' on ${device}`;
+                document.getElementById('emulator-debug-badge').classList.toggle('hidden', !isDebug);
+
+                emulatorClickCount = 0;
+                isEmulatorScreenOn = true;
+                document.getElementById('emulator-screen-container').classList.remove('opacity-10');
+                toggleRightToolWindow('emulator', true);
+                renderLiveEmulatorScreen();
+
+                switchBottomTab('logcat');
+                document.getElementById('logcat-live-dot').classList.remove('hidden');
+                addLogcat('I', 'ActivityTaskManager', `START u0 {cmp=${projectMeta.packageName}/.MainActivity}`);
+                addLogcat('D', 'MainActivity', `onCreate: ${projectMeta.name} (${isDebug ? 'Debug Mode' : 'Release Preview'})`);
+            }, 1600);
+        }
+
+        function stopApplication() {
+            document.getElementById('btn-stop-app').classList.add('hidden');
+            document.getElementById('logcat-live-dot').classList.add('hidden');
+            document.getElementById('status-message').textContent = 'Process terminated.';
+            addLogcat('W', 'Process', 'Sending signal SIGKILL to application process.');
+            closeRightDrawer();
+        }
+
+        function renderLiveEmulatorScreen() {
+            const screen = document.getElementById('emulator-live-screen');
+            screen.innerHTML = layoutWidgets.map(w => {
+                if (w.type === 'ImageView') {
+                    return `<div class="p-3 rounded-2xl bg-emerald-500/10 flex items-center justify-center"><i class="fab fa-android text-5xl" style="color:${w.color}"></i></div>`;
+                } else if (w.type === 'TextView') {
+                    return `<div id="live-${w.id}" class="text-center font-semibold px-2" style="color:${w.color};font-size:${w.size}px">${w.text}</div>`;
+                } else if (w.type === 'EditText') {
+                    return `<input id="live-${w.id}" type="text" placeholder="${w.hint || 'Input...'}" class="w-full px-3 py-2 rounded-lg border border-zinc-300 bg-white text-zinc-800 text-xs focus:outline-none focus:border-indigo-500">`;
+                } else if (w.type === 'Switch' || w.type === 'CheckBox') {
+                    return `<label class="flex items-center gap-2 text-xs font-medium cursor-pointer" style="color:${w.color}"><input type="checkbox" checked class="accent-indigo-600"><span>${w.text}</span></label>`;
+                } else {
+                    return `<button onclick="handleEmulatorWidgetAction('${w.id}', '${w.text}')" class="px-5 py-2 rounded-xl text-white font-semibold shadow active:scale-95 transition" style="background:${w.color};font-size:${w.size}px">${w.text}</button>`;
+                }
+            }).join('');
+        }
+
+        function handleEmulatorWidgetAction(btnId, btnText) {
+            emulatorClickCount++;
+            addLogcat('D', 'MainActivity', `onClick(@id/${btnId}) -> count=${emulatorClickCount}`);
+
+            // Cek apakah ada EditText yang diisi pengguna di emulator
+            const editWidget = layoutWidgets.find(w => w.type === 'EditText');
+            const inputVal = editWidget ? document.getElementById(`live-${editWidget.id}`)?.value.trim() : '';
+
+            const firstTv = layoutWidgets.find(w => w.type === 'TextView');
+            if (firstTv) {
+                const tvEl = document.getElementById(`live-${firstTv.id}`);
+                if (tvEl) {
+                    tvEl.textContent = inputVal
+                        ? `Halo ${inputVal}! Klik ke-${emulatorClickCount}`
+                        : `Tombol "${btnText}" ditekan ${emulatorClickCount} kali!`;
+                }
+            }
+
+            const toastMsg = inputVal ? `Halo, ${inputVal}! (${emulatorClickCount})` : `Toast: ${btnText} (${emulatorClickCount})`;
+            showAndroidToast(toastMsg);
+            addLogcat('I', 'Toast', `Displayed: "${toastMsg}"`);
+        }
+
+        function showAndroidToast(msg) {
+            const container = document.getElementById('emulator-toast-container');
+            container.innerHTML = `<div class="android-toast absolute left-1/2 bottom-1 bg-zinc-800/95 text-white text-[11px] px-3 py-1.5 rounded-full shadow-lg flex items-center gap-1.5 whitespace-nowrap border border-zinc-700"><i class="fab fa-android text-emerald-400"></i><span>${msg}</span></div>`;
+        }
+
+        function emulatorPhysicalButton(btn) {
+            if (btn === 'power') {
+                isEmulatorScreenOn = !isEmulatorScreenOn;
+                document.getElementById('emulator-screen-container').classList.toggle('opacity-10', !isEmulatorScreenOn);
+                addLogcat('I', 'PowerManager', isEmulatorScreenOn ? 'Waking up device screen...' : 'Going to sleep...');
+            } else if (btn === 'volUp' || btn === 'volDown') {
+                emulatorVolume = Math.min(100, Math.max(0, emulatorVolume + (btn === 'volUp' ? 15 : -15)));
+                const hud = document.getElementById('emulator-volume-hud');
+                document.getElementById('emulator-volume-bar').style.height = `${emulatorVolume}%`;
+                hud.classList.remove('hidden');
+                clearTimeout(window._volTimer);
+                window._volTimer = setTimeout(() => hud.classList.add('hidden'), 1500);
+            }
+        }
+
+        function emulatorNavAction(action) {
+            addLogcat('D', 'SystemUI', `Navigation key pressed: ${action.toUpperCase()}`);
+            if (action === 'home') {
+                showAndroidToast('Launcher Home Screen');
+            } else if (action === 'back') {
+                showAndroidToast('onBackPressed() triggered');
+            } else if (action === 'recents') {
+                showAndroidToast(`Recent Apps: ${projectMeta.name}`);
+            }
+        }
+
+        function takeEmulatorScreenshot() {
+            showAndroidToast('Screenshot saved to Desktop');
+            appendBuildLog(`Emulator screenshot captured (${document.getElementById('device-selector').value}).`, 'info');
+        }
+
+        function rotateEmulator() {
+            const body = document.getElementById('emulator-phone-body');
+            isEmulatorLandscape = !isEmulatorLandscape;
+            if (isEmulatorLandscape) {
+                body.classList.remove('w-[255px]', 'h-[495px]');
+                body.classList.add('w-[400px]', 'h-[235px]');
+            } else {
+                body.classList.remove('w-[400px]', 'h-[235px]');
+                body.classList.add('w-[255px]', 'h-[495px]');
+            }
+        }
+
+        function changeVirtualDevice() {
+            const dev = document.getElementById('device-selector').value;
+            document.getElementById('emulator-device-title').textContent = dev;
+        }
+
+        // ==========================================
+        // 9. RIGHT DRAWER & GEMINI AI ASSISTANT
+        // ==========================================
+        function toggleRightToolWindow(view, forceOpen = false) {
+            const drawer = document.getElementById('right-tool-drawer');
+            const isCurrentlyOpen = !drawer.classList.contains('hidden');
+            const activeViewVisible = !document.getElementById(`right-view-${view}`).classList.contains('hidden');
+
+            if (isCurrentlyOpen && activeViewVisible && !forceOpen) {
+                closeRightDrawer();
+                return;
+            }
+
+            drawer.classList.remove('hidden');
+            drawer.classList.add('flex');
+
+            ['emulator', 'gradle', 'gemini'].forEach(v => {
+                document.getElementById(`right-view-${v}`).classList.toggle('hidden', v !== view);
+                document.getElementById(`right-view-${v}`).classList.toggle('flex', v === view);
+                const stripeBtn = document.getElementById(`stripe-right-${v}`);
+                stripeBtn.classList.toggle('bg-darcula-active', v === view);
+                stripeBtn.classList.toggle('text-white', v === view);
+            });
+        }
+
+        function closeRightDrawer() {
+            document.getElementById('right-tool-drawer').classList.add('hidden');
+            document.getElementById('right-tool-drawer').classList.remove('flex');
+            ['emulator', 'gradle', 'gemini'].forEach(v => {
+                document.getElementById(`stripe-right-${v}`).classList.remove('bg-darcula-active', 'text-white');
+            });
+        }
+
+        function askGeminiPreset(preset) {
+            const chat = document.getElementById('gemini-chat-history');
+            if (preset === 'login_xml') {
+                layoutWidgets = [
+                    { id: 'tvHeader', type: 'TextView', text: 'Login Akun Anda', color: '#1E293B', size: 18 },
+                    { id: 'etUser', type: 'EditText', text: '', hint: 'Username / Email', color: '#334155', size: 13 },
+                    { id: 'btnSubmit', type: 'Button', text: 'Masuk Sekarang', color: '#4F46E5', size: 14 }
+                ];
+                regenerateXmlFromWidgets();
+                renderDesignerCanvas();
+                chat.innerHTML += `<div class="bg-darcula-active/40 border border-darcula-accent/40 rounded-xl p-2.5 text-white">Layout Login XML telah diterapkan ke <strong>activity_main.xml</strong>!</div>`;
+            } else {
+                insertCodeSnippet('click');
+                chat.innerHTML += `<div class="bg-darcula-active/40 border border-darcula-accent/40 rounded-xl p-2.5 text-white">Snippet <code>setOnClickListener</code> telah disisipkan ke editor kode aktif.</div>`;
+            }
+            chat.scrollTop = chat.scrollHeight;
+        }
+
+        function sendGeminiPrompt() {
+            const input = document.getElementById('gemini-prompt-input');
+            const text = input.value.trim();
+            if (!text) return;
+            const chat = document.getElementById('gemini-chat-history');
+            chat.innerHTML += `<div class="bg-darcula-panel border border-darcula-border rounded-xl p-2 text-white ml-4">${text}</div>`;
+            chat.innerHTML += `<div class="bg-darcula-bg border border-darcula-border rounded-xl p-2.5 text-darcula-text">Untuk menangani interaksi UI di Android, gunakan <code>findViewById&lt;Button&gt;(R.id.btnAction)</code> lalu panggil <code>setOnClickListener { ... }</code>. Klik tombol <strong>Run</strong> untuk mengujinya di emulator!</div>`;
+            input.value = '';
+            chat.scrollTop = chat.scrollHeight;
+        }
+
+        // ==========================================
+        // 10. BOTTOM PANEL (BUILD, LOGCAT, TERMINAL)
+        // ==========================================
+        function switchBottomTab(tab) {
+            ['build', 'logcat', 'problems', 'terminal'].forEach(t => {
+                const btn = document.getElementById(`tab-bottom-${t}`);
+                const content = document.getElementById(`content-bottom-${t}`);
+                if (t === tab) {
+                    btn.classList.add('border-darcula-accent', 'text-white', 'bg-darcula-bg/60');
+                    btn.classList.remove('border-transparent', 'text-darcula-textMuted');
+                    content.classList.remove('hidden');
+                    if (t === 'logcat' || t === 'terminal') content.classList.add('flex');
+                } else {
+                    btn.classList.remove('border-darcula-accent', 'text-white', 'bg-darcula-bg/60');
+                    btn.classList.add('border-transparent', 'text-darcula-textMuted');
+                    content.classList.add('hidden');
+                    content.classList.remove('flex');
+                }
+            });
+        }
+
+        function toggleBottomToolWindow(tab) {
+            if (isBottomCollapsed) toggleBottomPanelHeight();
+            switchBottomTab(tab);
+        }
+
+        function appendBuildLog(msg, type = 'muted') {
+            const el = document.getElementById('content-bottom-build');
+            const map = {
+                muted: 'text-darcula-textMuted',
+                info: 'text-darcula-cyan',
+                success: 'text-emerald-400 font-semibold',
+                error: 'text-rose-400 font-semibold'
+            };
+            const div = document.createElement('div');
+            div.className = map[type] || map.muted;
+            div.textContent = msg;
+            el.appendChild(div);
+            el.scrollTop = el.scrollHeight;
+        }
+
+        function addLogcat(level, tag, message) {
+            const now = new Date();
+            const time = now.toTimeString().split(' ')[0] + '.' + String(now.getMilliseconds()).padStart(3, '0');
+            logcatEntries.push({ time, level, tag, message });
+            renderLogcat();
+        }
+
+        function renderLogcat() {
+            const list = document.getElementById('logcat-list');
+            const query = document.getElementById('logcat-filter').value.toLowerCase();
+            const lvl = document.getElementById('logcat-level-filter').value;
+            const rank = { D: 1, I: 2, W: 3, E: 4 };
+            const minRank = lvl === 'ALL' ? 0 : (rank[lvl] || 0);
+
+            const badges = {
+                I: 'bg-emerald-500/20 text-emerald-400',
+                D: 'bg-sky-500/20 text-sky-400',
+                W: 'bg-amber-500/20 text-amber-400',
+                E: 'bg-rose-500/20 text-rose-400'
+            };
+
+            const filtered = logcatEntries.filter(e =>
+                (rank[e.level] || 1) >= minRank &&
+                (e.tag.toLowerCase().includes(query) || e.message.toLowerCase().includes(query))
+            );
+
+            if (filtered.length === 0) {
+                list.innerHTML = `<div class="text-darcula-textMuted italic">Tidak ada entri Logcat...</div>`;
+                return;
+            }
+
+            list.innerHTML = filtered.map(e => `
+                <div class="flex items-start gap-2 px-1 py-0.5 hover:bg-darcula-hover/40 rounded">
+                    <span class="text-darcula-textMuted shrink-0">${e.time}</span>
+                    <span class="px-1 rounded font-bold text-[10px] shrink-0 ${badges[e.level]}">${e.level}</span>
+                    <span class="text-darcula-orange font-semibold shrink-0">${e.tag}:</span>
+                    <span class="text-darcula-text break-all">${e.message}</span>
+                </div>
+            `).join('');
+            list.scrollTop = list.scrollHeight;
+        }
+
+        function clearBottomLogs() {
+            document.getElementById('content-bottom-build').innerHTML = '';
+            logcatEntries = [];
+            renderLogcat();
+        }
+
+        function toggleBottomPanelHeight() {
+            const panel = document.getElementById('bottom-tool-window');
+            const icon = document.getElementById('icon-bottom-expand');
+            isBottomCollapsed = !isBottomCollapsed;
+            panel.classList.toggle('h-44', !isBottomCollapsed);
+            panel.classList.toggle('sm:h-48', !isBottomCollapsed);
+            panel.classList.toggle('h-8', isBottomCollapsed);
+            icon.className = isBottomCollapsed ? 'fas fa-chevron-up text-[11px]' : 'fas fa-chevron-down text-[11px]';
+        }
+
+        function handleTerminalCommand(e) {
+            if (e.key !== 'Enter') return;
+            const input = document.getElementById('terminal-input');
+            const cmd = input.value.trim();
+            if (!cmd) return;
+            const hist = document.getElementById('terminal-history');
+            hist.innerHTML += `<div><span class="text-emerald-400">dev@android-studio:~$</span> <span class="text-white">${cmd}</span></div>`;
+
+            if (cmd === 'help') {
+                hist.innerHTML += `<div class="text-darcula-textMuted">Commands: ./gradlew assembleDebug, ./gradlew clean, adb devices, ls, clear</div>`;
+            } else if (cmd === 'ls') {
+                hist.innerHTML += `<div class="text-darcula-cyan">${Object.keys(projectFiles).join('  ')}</div>`;
+            } else if (cmd === 'adb devices') {
+                hist.innerHTML += `<div>List of devices attached<br>emulator-5554&nbsp;&nbsp;&nbsp;&nbsp;device (${document.getElementById('device-selector').value})</div>`;
+            } else if (cmd.includes('gradlew')) {
+                hist.innerHTML += `<div class="text-emerald-400">BUILD SUCCESSFUL in 1s 310ms</div>`;
+            } else if (cmd === 'clear') {
+                hist.innerHTML = '';
+            } else {
+                hist.innerHTML += `<div class="text-rose-400">sh: ${cmd}: command not found</div>`;
+            }
+            input.value = '';
+            const box = document.getElementById('content-bottom-terminal');
+            box.scrollTop = box.scrollHeight;
+        }
+
+        // ==========================================
+        // 11. MODALS & EXPORT PROJECT
+        // ==========================================
+        function openNewFileModal() {
+            document.getElementById('new-file-name').value = '';
+            document.getElementById('new-file-error').classList.add('hidden');
+            document.getElementById('modal-new-file').classList.remove('hidden');
+            document.getElementById('modal-new-file').classList.add('flex');
+        }
+
+        function closeNewFileModal() {
+            document.getElementById('modal-new-file').classList.add('hidden');
+            document.getElementById('modal-new-file').classList.remove('flex');
+        }
+
+        function createNewFile() {
+            const type = document.getElementById('new-file-type').value;
+            const raw = document.getElementById('new-file-name').value.trim().replace(/\.(kt|xml)$/i, '');
+            const err = document.getElementById('new-file-error');
+
+            if (!raw || !/^[a-zA-Z0-9_]+$/.test(raw)) {
+                err.textContent = 'Gunakan hanya huruf, angka, dan underscore (_).';
+                err.classList.remove('hidden');
+                return;
+            }
+            const fileName = `${raw}.${type}`;
+            if (projectFiles[fileName]) {
+                err.textContent = `File ${fileName} sudah ada.`;
+                err.classList.remove('hidden');
+                return;
+            }
+
+            projectFiles[fileName] = type === 'kt'
+                ? { name: fileName, folder: `app/kotlin+java/${projectMeta.packageName}`, lang: 'kotlin', icon: 'fa-file-code text-purple-400', dirty: false, content: `package ${projectMeta.packageName}\n\nclass ${raw} {\n    fun greet(): String = "Hello from ${raw}"\n}` }
+                : { name: fileName, folder: 'app/res/layout', lang: 'xml', icon: 'fa-table-cells-large text-emerald-400', dirty: false, content: `<?xml version="1.0" encoding="utf-8"?>\n<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"\n    android:layout_width="match_parent"\n    android:layout_height="match_parent"\n    android:orientation="vertical">\n\n    <TextView\n        android:layout_width="wrap_content"\n        android:layout_height="wrap_content"\n        android:text="${raw}" />\n\n</LinearLayout>` };
+
+            closeNewFileModal();
+            openFile(fileName);
+        }
+
+        function openSdkManagerModal() {
+            document.getElementById('modal-sdk-manager').classList.remove('hidden');
+            document.getElementById('modal-sdk-manager').classList.add('flex');
+        }
+
+        function openAvdManagerModal() {
+            document.getElementById('modal-avd-manager').classList.remove('hidden');
+            document.getElementById('modal-avd-manager').classList.add('flex');
+        }
+
+        function selectDeviceFromAvd(devName) {
+            const sel = document.getElementById('device-selector');
+            sel.value = devName;
+            changeVirtualDevice();
+            document.getElementById('modal-avd-manager').classList.add('hidden');
+            toggleRightToolWindow('emulator', true);
+        }
+
+        function createNewAvd() {
+            const name = document.getElementById('new-avd-name').value.trim();
+            if (!name) return;
+            const sel = document.getElementById('device-selector');
+            const opt = document.createElement('option');
+            opt.value = name;
+            opt.textContent = name;
+            opt.className = 'bg-darcula-panel';
+            sel.appendChild(opt);
+            sel.value = name;
+
+            document.getElementById('avd-list').innerHTML += `
+                <div class="p-2.5 rounded-lg bg-darcula-bg border border-darcula-border flex items-center justify-between">
+                    <div>
+                        <div class="font-semibold text-white">${name}</div>
+                        <div class="text-[11px] text-darcula-textMuted">Custom Virtual Device • Android 15.0</div>
+                    </div>
+                    <button onclick="selectDeviceFromAvd('${name}')" class="px-2.5 py-1 rounded bg-emerald-600 text-white font-semibold"><i class="fas fa-play mr-1"></i>Launch</button>
+                </div>
+            `;
+            document.getElementById('new-avd-name').value = '';
+            changeVirtualDevice();
+        }
+
+        function exportProjectBundle() {
+            const bundle = JSON.stringify({ project: projectMeta, files: projectFiles }, null, 2);
+            const blob = new Blob([bundle], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `${projectMeta.name}_AndroidStudioProject.json`;
+            a.click();
+            URL.revokeObjectURL(url);
+            appendBuildLog(`Project '${projectMeta.name}' exported successfully.`, 'success');
+        }
+    </script>
+</body>
+</html>
